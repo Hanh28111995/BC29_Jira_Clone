@@ -1,4 +1,3 @@
-
 import Register from "pages/register/Register";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
 

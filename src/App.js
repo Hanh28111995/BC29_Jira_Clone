@@ -5,18 +5,23 @@ import { BrowserRouter } from "react-router-dom";
 import Router from "./routes";
 import { Suspense, useState } from "react";
 import { LoadingProvider } from "./contexts/loading.context";
-import ModalEdit from "pages/Modal/ModalEdit";
-import ModalDetailTask from "components/ModalCyber/ModalDetailTask";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import ModalEdit from "./pages/Modal/ModalEdit";
+import ModalDetailTask from "./components/ModalCyber/ModalDetailTask";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={<></>}>
-        <LoadingProvider>
+        <QueryClientProvider client={queryClient}>
+          <LoadingProvider>
           <ModalDetailTask/>
           <ModalEdit />
           <Router />
-        </LoadingProvider>
+          </LoadingProvider>
+        </QueryClientProvider>
       </Suspense>
     </BrowserRouter>
   );
