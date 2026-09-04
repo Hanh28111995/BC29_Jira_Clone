@@ -1,9 +1,12 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import {
-  initializeAppCheck,
-  ReCaptchaEnterpriseProvider,
-} from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
+
+
+if (process.env.NODE_ENV === 'development') {
+  window.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_WEB_API_KEY,
@@ -17,19 +20,13 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-if (process.env.NODE_ENV === "development") {
-  window.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
-
 export const auth = getAuth(app);
 
-export const appCheck = process.env.REACT_APP_RECAPTCHA_KEY
+const recaptchaKey = process.env.REACT_APP_RECAPTCHA_KEY?.trim();
+
+export const appCheck = recaptchaKey
   ? initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(
-        process.env.REACT_APP_RECAPTCHA_KEY,
-      ),
+      provider: new ReCaptchaEnterpriseProvider(recaptchaKey),
       isTokenAutoRefreshEnabled: true,
     })
   : null;
-
-export default app;

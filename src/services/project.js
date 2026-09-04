@@ -1,150 +1,95 @@
 import { request } from "../configs/axios";
+import { GetAllPriorityTypeApi } from "./data/priorityTypes";
+import { GetAllStatusTypeApi } from "./data/statusTypes";
+import { GetAllTaskTypeApi } from "./data/taskTypes";
+import { AddTaskApi, GetDetailTaskApi } from "./task";
 
-const fetchProjectListAPI = () => {
-    return request({
-        url: '/Project/getAllProject',
-        method: 'GET',
-    })
+
+const GetAllProjectApi = ()=> {
+  return request({
+    url: '/api/Project/get-all-project',
+    method: 'GET',
+})
 };
 
-const fetchProjectPriorityAPI = () => {
-    return request({
-        url: '/Priority/getAll',
-        method: 'GET',
-    })
+const GetDetailProjectApi = (id) => {
+  return request({
+    url: `/api/Project/get-project-detail/${id}`,
+    method: 'GET',
+  });
+}
+
+const AddProjectApi = (data) => {
+  return request({
+    url: '/api/Project/create-project',
+    method: 'POST',
+    data,
+  });
 };
 
-const fetchProjectTaskTypeAPI = () => {
-    return request({
-        url: '/TaskType/getAll',
-        method: 'GET',
-    })
+const UpdateProjectApi = (id, data) => {
+  return request({
+    url: `/api/Project/update-project/${id}`,
+    method: 'PUT',
+    data,
+  });
+}
+
+const DeleteProjectApi = (id) => {
+  return request({
+    url: `/api/Project/delete-project/${id}`,
+    method: 'DELETE',
+  });
+}
+
+const AddProjectMembersApi = (data) => {
+  return request({
+    url: '/api/Project/assign-user-project',
+    method: 'POST',
+    data,
+  });
 };
 
-const fetchProjectStatusIdAPI = () => {
-    return request({
-        url: '/Status/getAll',
-        method: 'GET',
-    })
+const RemoveProjectMembersApi = (data) => {
+  return request({
+    url: '/api/Project/remove-user-from-project',
+    method: 'POST',
+    data,
+  });
 };
 
-const fetchCreateTaskAPI = (data) => {
-    return request({
-        url: '/Project/createTask',
-        method: 'POST',
-        data,
-    })
-}
+const fetchProjectListAPI = GetAllProjectApi;
+const fetchProjectPriorityAPI = GetAllPriorityTypeApi;
+const fetchProjectTaskTypeAPI = GetAllTaskTypeApi;
+const fetchProjectStatusIdAPI = GetAllStatusTypeApi;
+const fetchCreateTaskAPI = AddTaskApi;
+const fetchGetUserAPI = (keyword) => request({ url: '/api/Users/get-all-users', method: 'GET', params: { keyword } });
+const fetchProjectCategoryAPI = () => request({ url: '/api/ProjectCategory/get-all', method: 'GET' });
+const fetchProjectDetailAPI = GetDetailProjectApi;
+const fetchUpdateProjectDetailAPI = UpdateProjectApi;
+const fetchCreateProjectAPI = AddProjectApi;
+const fetchDeleteProjectAPI = DeleteProjectApi;
+const fetchAddUserAPI = AddProjectMembersApi;
+const fetchRemoveUserFromProjectAPI = RemoveProjectMembersApi;
+const fetchMembersListAPI = (projectId) => request({ url: `/api/Users/get-user-by-project/${projectId}`, method: 'GET' });
+const fetchGetTaskDetailAPI = GetDetailTaskApi;
+const fetchUpdateStatusAPI = (data) => request({ url: `/api/Tasks/update-status/${data.taskId}`, method: 'PUT', data });
+const fetchUpdatePriorityAPI = (data) => request({ url: `/api/Tasks/update-priority/${data.taskId}`, method: 'PUT', data });
+const fetchUpdateEstimateAPI = (data) => request({ url: `/api/Tasks/update-estimate/${data.taskId}`, method: 'PUT', data });
+const fetchUpdateDescriptionAPI = (data) => request({ url: `/api/Tasks/update-description/${data.taskId}`, method: 'PUT', data });
+const fetchUpdateTimeTrackingAPI = (data) => request({ url: `/api/Tasks/update-time-tracking/${data.taskId}`, method: 'PUT', data });
+const fetchUpdateAllOfTaskAPI = (data) => request({ url: `/api/Tasks/update-task/${data.taskId}`, method: 'PUT', data });
+const fetchDeleteTaskAPI = (taskId) => request({ url: `/api/Tasks/delete-task/${taskId}`, method: 'DELETE' });
 
-const fetchGetUserAPI = (keyword) => {
-    return request({
-        url: `/Users/getUser?keyword=${keyword}`,
-        method: 'GET',
-    })
+export {
+  GetAllProjectApi, GetDetailProjectApi, AddProjectApi, UpdateProjectApi,
+  DeleteProjectApi, AddProjectMembersApi, RemoveProjectMembersApi,
+  fetchProjectListAPI, fetchProjectPriorityAPI, fetchProjectTaskTypeAPI,
+  fetchProjectStatusIdAPI, fetchCreateTaskAPI, fetchGetUserAPI,
+  fetchProjectCategoryAPI, fetchProjectDetailAPI, fetchUpdateProjectDetailAPI,
+  fetchCreateProjectAPI, fetchDeleteProjectAPI, fetchAddUserAPI,
+  fetchRemoveUserFromProjectAPI, fetchMembersListAPI, fetchGetTaskDetailAPI,
+  fetchUpdateStatusAPI, fetchUpdatePriorityAPI, fetchUpdateEstimateAPI,
+  fetchUpdateDescriptionAPI, fetchUpdateTimeTrackingAPI,
+  fetchUpdateAllOfTaskAPI, fetchDeleteTaskAPI,
 };
-
-const fetchProjectCategoryAPI = () => {
-    return request({
-        url: '/ProjectCategory',
-        method: 'GET',
-    })
-}
-const fetchProjectDetailAPI = (projectID) => {
-    return request({
-        url: `/Project/getProjectDetail?id=${projectID}`,
-        method: 'GET',
-    })
-}
-const fetchUpdateProjectDetailAPI = (projectID, data) => {
-    return request({
-        url: `/Project/updateProject?projectId=${projectID}`,
-        method: 'PUT',
-        data,
-    })
-}
-const fetchCreateProjectAPI = (data) => {
-    return request({
-        url: '/Project/createProjectAuthorize',
-        method: 'POST',
-        data,
-    })
-}
-
-const fetchDeleteProjectAPI = (idProject) => {
-    return request({
-        url: `/Project/deleteProject?projectId=${idProject}`,
-        method: 'DELETE',
-    })
-}
-
-const fetchAddUserAPI = (data) => {
-    return request({
-        url: '/Project/assignUserProject',
-        method: 'POST',
-        data,
-    })
-}
-
-const fetchRemoveUserFromProjectAPI = (data) => {
-    return request({
-        url: '/Project/removeUserFromProject',
-        method: 'POST',
-        data,
-    })
-}
-
-
-const fetchMembersListAPI = (projectID) => {
-    return request({
-        url: `/Users/getUserByProjectId?idProject=${projectID}`,
-        method: 'GET',
-    })
-};
-
-const fetchGetTaskDetailAPI = (taskID) => {
-    return request({
-        url: `Project/getTaskDetail?taskId=${taskID}`,
-        method: 'GET',
-    })
-};
-
-
-const fetchUpdateStatusAPI = (data) => {
-    return request({
-        url: '/Project/updateStatus',
-        method: 'PUT',
-        data,
-    })
-}
-
-const fetchUpdateDescriptionAPI = (data) => {
-    return request({
-        url: '/Project/updateDescription',
-        method: 'PUT',
-        data,
-    })
-}
-
-const fetchUpdateTimeTrackingAPI = (data) => {
-    return request({
-        url: '/Project/updateTimeTracking',
-        method: 'PUT',
-        data,
-    })
-}
-
-const fetchUpdateAllOfTaskAPI = (data) => {
-    return request({
-        url: '/Project/updateTask',
-        method: 'POST',
-        data,
-    })
-}
-const fetchDeleteTaskAPI = (taskID) => {
-    return request({
-        url: `/Project/removeTask?taskId=${taskID}`,
-        method: 'DELETE',
-    })
-}
-
-export {fetchDeleteTaskAPI ,fetchUpdateAllOfTaskAPI, fetchUpdateStatusAPI, fetchUpdateTimeTrackingAPI, fetchUpdateDescriptionAPI, fetchProjectListAPI, fetchMembersListAPI, fetchGetUserAPI, fetchAddUserAPI, fetchProjectCategoryAPI, fetchCreateProjectAPI, fetchDeleteProjectAPI, fetchRemoveUserFromProjectAPI, fetchProjectDetailAPI, fetchUpdateProjectDetailAPI, fetchProjectPriorityAPI, fetchProjectTaskTypeAPI, fetchProjectStatusIdAPI, fetchCreateTaskAPI, fetchGetTaskDetailAPI, }

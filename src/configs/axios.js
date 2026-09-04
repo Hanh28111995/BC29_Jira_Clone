@@ -1,31 +1,64 @@
-import axios from 'axios';
-import { BASE_URL, TOKEN_CYBERSOFT, USER_KEY } from '../constants/common';
+import axios from "axios";
+import { BASE_URL, USER_KEY } from "../constants/common";
+import { getAuth } from "firebase/auth";
 
-let userInfor = localStorage.getItem(USER_KEY);
-if (userInfor) {
-    userInfor = JSON.parse(userInfor);
-}
-// console.log('debugger');
 export const request = axios.create({
-    headers:
-    {
-        TokenCybersoft: TOKEN_CYBERSOFT,
-        // Authorization: userInfor?.accessToken,
-    },
-    baseURL: BASE_URL,
-})
+  proxy: false,    
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
 
-request.interceptors.request.use((config) => {
-    let userInfor = localStorage.getItem(USER_KEY);
-    if (userInfor) {
-        userInfor = JSON.parse(userInfor);
-    }
-    if (userInfor) {
-        config.headers.Authorization = `Bearer ${userInfor.accessToken}`;
-    }
-    return config;
-})
+request.interceptors.request.use(async (config) => {  
+  const savedData = localStorage.getItem(USER_KEY);
+  if (savedData) {
+    try {
+      const parsedData = JSON.parse(savedData);            
+      const token = parsedData?.loginToken || parsedData?.accessToken;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }    
+      const auth = getAuth();
+      
+     const currentUser = await new Promise((resolve) => {
+        // Nếu có user sẵn rồi thì lấy luôn
+        if (auth.currentUser) return resolve(auth.currentUser);
+        // Nếu chưa có, đợi thằng onAuthStateChanged phát tín hiệu (chỉ nghe 1 lần duy nhất để tránh rò rỉ bộ nhớ)
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          resolve(user);
+        });
+      });
 
-request.interceptors.response.use((response) => {
+      // Nếu sau khi đợi mà tìm thấy user, tiến hành lấy token đóng gói vào header
+      if (currentUser) {        
+        const firebaseRealtimeToken = await currentUser.getIdToken();
+        if (firebaseRealtimeToken) {
+          config.headers["firebase-token"] = firebaseRealtimeToken;
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi xử lý gửi token bảo mật:", error);
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+request.interceptors.response.use(
+  (response) => {
     return response;
-})
+  },
+  (error) => {
+    console.log("Lỗi hệ thống trả về:", error);    
+    if (error.response?.status === 403) {
+      alert("Phiên làm việc không hợp lệ hoặc đã thay đổi thiết bị. Vui lòng đăng nhập lại!");            
+      localStorage.removeItem(USER_KEY);            
+      const auth = getAuth();
+      auth.signOut();            
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);

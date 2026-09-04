@@ -1,66 +1,44 @@
-import {TOKEN_CYBERSOFT,BASE_URL, GROUP_ID} from '../constants/common';
 import { request } from "../configs/axios";
 
-const loginAPI = (data) => {
-  return request({
-    data: data,
-    url: '/Users/signin',
-    method: "POST",
-  });
-};
 
-const registerApi = (data) => {
-  return request({
-    data,
-    url: '/Users/signup',
-    method: "POST",
-  });
-};
 
-const userListApi = ()=> {
-
+const getMemberListApi = ()=> {
   return request({
-    url: '/Users/getUser',
+    url: '/api/Users/get-all-users-for-memberlist',
     method: 'GET',
 })
 };
 
-const deleteUserApi = (tk) => {
+const getUserListApi = ()=> {
   return request({
-    url: `Users/deleteUser?id=${tk}`,
+    url: '/api/Users/get-all-users',
+    method: 'GET',
+})
+};
+
+const getUserDetailApi = (id) => {
+  return request({
+    url: `/api/Users/get-user-detail/${id}`,
+    method: 'GET',
+  });
+}
+
+
+const deleteUserApi = (id) => {
+  return request({
+    url: `/api/Users/delete-user/${id}`,
     method: 'DELETE',
   });
 }
 
-const updateUserApi = (data) => {
-  return request({
-    url: 'Users/editUser',
-    method: 'PUT',
-    data,
-  });
-}
 
+const userListApi = getUserListApi;
+const userDetailApi = getUserDetailApi;
+const registerApi = (data) => request({ url: '/Users/signup', method: 'POST', data });
+const updateUserApi = (data) => request({ url: 'Users/editUser', method: 'PUT', data });
+const addUserApi = (data) => request({ url: '/QuanLyNguoiDung/ThemNguoiDung', method: 'POST', data });
 
-
-
-
-const userDetailApi = (tk) =>{
-  return request({
-      url: `/QuanLyNguoiDung/LayThongTinNguoiDung?taiKhoan=${tk}`,
-      method: 'POST',
-      data: tk,
-  })
+export {
+  getMemberListApi, getUserListApi, getUserDetailApi, deleteUserApi,
+  userListApi, userDetailApi, registerApi, updateUserApi, addUserApi,
 };
-
-const addUserApi = (data) => {
-  return request({
-    url: '/QuanLyNguoiDung/ThemNguoiDung',
-    method: 'POST',
-    data,
-  });
-};
-
-
-  
-
-export { loginAPI, registerApi , userListApi, userDetailApi, addUserApi, updateUserApi, deleteUserApi};

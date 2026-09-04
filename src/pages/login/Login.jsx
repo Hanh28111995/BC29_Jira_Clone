@@ -5,8 +5,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { getToken } from "firebase/app-check";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { auth, appCheck } from "../../configs/firebase";
-import { loginAPI } from "services/user";
-import { loginMailApi, loginPhoneApi, verifyMailOtpApi, verifyPhoneOtpApi } from "../../services/auth.service";
+import { loginPhoneApi, verifyPhoneOtpApi, loginMailApi, verifyMailOtpApi, loginPW } from "../../services/auth.service";
 import OTPInputCustom from "../../components/OtpInput/OtpInput";
 import { USER_KEY } from "../../constants/common";
 import { setUserInfoAction } from "../../store/actions/user.action";
@@ -49,8 +48,8 @@ export default function Login() {
     event.preventDefault();
     setLoading(true);
     try {
-      const result = await loginAPI(credentials);
-      saveUser(result.data.content);
+      const result = await loginPW(credentials);
+      saveUser(result.content);
       notification.success({ description: "Log in success" });
     } catch (error) {
       notification.warning({ description: getErrorMessage(error, "Đăng nhập thất bại") });
