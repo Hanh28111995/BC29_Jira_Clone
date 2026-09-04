@@ -254,8 +254,8 @@ function ProjectTable() {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => handleEditProject(record.id)}><EditOutlined /></a>
-          <a onClick={() => handleDeleteProject(record.id)}><DeleteOutlined /></a>
+          <Button type="text" icon={<EditOutlined />} aria-label="Edit project" onClick={() => handleEditProject(record.id)} />
+          <Button type="text" danger icon={<DeleteOutlined />} aria-label="Delete project" onClick={() => handleDeleteProject(record.id)} />
         </Space>
       ),
     },

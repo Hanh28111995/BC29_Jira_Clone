@@ -27,7 +27,7 @@ export default function Register() {
     });
 
     const handleChange = (event) => {
-        const { name, title, minLength, maxLength, pattern, value, validity: { valueMissing, patternMismatch, tooLong, tooShort }, } = event.target;
+        const { name, value } = event.target;
         setState({
             values: {
                 ...state.values,
@@ -66,15 +66,13 @@ export default function Register() {
             <header>
                 <nav className="navbar navbar-expand-sm bg-light navbar-light">
                     {/* Brand/logo */}
-                    <a className="navbar-brand" href="#">
+                    <a className="navbar-brand" href="/">
                         <img src="https://wac-cdn.atlassian.com/dam/jcr:e348b562-4152-4cdc-8a55-3d297e509cc8/Jira%20Software-blue.svg?cdnVersion=535" alt="logo" style={{ height: '28px' }} />
                     </a>
                     {/* Links */}
                     <ul className="navbar-nav ml-auto">
                         <li className="nav-item">
-                            <button className="btn btn-signup" >
-                                <a className="nav-link" href="/">Sign In</a>
-                            </button>
+                            <button className="btn btn-signup" type="button" onClick={() => navigate('/login')}>Sign In</button>
                         </li>
                     </ul>
                 </nav>

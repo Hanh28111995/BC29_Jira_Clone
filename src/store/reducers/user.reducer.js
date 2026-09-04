@@ -1,6 +1,3 @@
-import { LoadingContext } from "contexts/loading.context";
-import { useContext } from "react";
-import { fetchCreateProjectAPI } from "services/project";
 import { USER_KEY } from "../../constants/common";
 import { SET_USER_INFO, SET_DATE, SEARCH_USER, DEFAULT_CATEGORY, SET_EDIT_DATA, SET_SUBMIT, SET_MY_PROJECT, SET_TASK_DETAIL, SET_RENDER_DETAIL, SET_PROJECT_MEMLIST, SET_TASK_MODAL } from "../types/user.type";
 
