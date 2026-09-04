@@ -19,7 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [mode, setMode] = useState(params.get("mode") === "otp" ? "otp" : "password");
-  const [credentials, setCredentials] = useState({ email: "", passWord: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [otpStep, setOtpStep] = useState("input");
@@ -44,7 +44,7 @@ export default function Login() {
     setOtp("");
   };
 
-  const handlePasswordSubmit = async (event) => {
+  const handlepasswordSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     try {
@@ -112,7 +112,7 @@ export default function Login() {
     <>
       <header><nav className="navbar navbar-expand-sm bg-light navbar-light"><a className="navbar-brand" href="/login"><img src="https://wac-cdn.atlassian.com/dam/jcr:e348b562-4152-4cdc-8a55-3d297e509cc8/Jira%20Software-blue.svg?cdnVersion=535" alt="Jira" style={{ height: "28px" }} /></a><button className="btn btn-signup" type="button" onClick={() => navigate("/register")}>Sign Up</button></nav></header>
       <section className="loginPage"><div className="row col-12 container-fluid"><div className="col-12 col-sm-6 login-component-1"><div className="p-content w-75"><h2>The #1 software development tool used by agile teams</h2><p>EACH PRODUCT ON A FREE PLAN:</p><ul><li>Supports up to 10 users</li><li>Includes 2 GB storage</li><li>Offers Community support</li><li>Is always free, no credit card needed</li></ul></div></div><div className="col-12 col-sm-6 login-component-2"><div className="form-content mx-auto"><div className="auth-switch"><button type="button" className={mode === "password" ? "active" : ""} onClick={() => changeMode("password")}>Mật khẩu</button><button type="button" className={mode === "otp" ? "active" : ""} onClick={() => changeMode("otp")}>OTP</button></div>
-        {mode === "password" && <form className="w-75 mx-auto my-5" onSubmit={handlePasswordSubmit}><h2 className="text-center mb-3">Welcome</h2><label>Work email</label><input value={credentials.email} onChange={(e) => setCredentials({ ...credentials, email: e.target.value })} type="email" className="form-control" required /><label>Password</label><input value={credentials.passWord} onChange={(e) => setCredentials({ ...credentials, passWord: e.target.value })} type="password" className="form-control" required /><button className="my-3 btn btn-primary w-100" type="submit" disabled={loading}>LOGIN</button></form>}
+        {mode === "password" && <form className="w-75 mx-auto my-5" onSubmit={handlepasswordSubmit}><h2 className="text-center mb-3">Welcome</h2><label>Work email</label><input value={credentials.email} onChange={(e) => setCredentials({ ...credentials, email: e.target.value })} type="email" className="form-control" required /><label>password</label><input value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value })} type="password" className="form-control" required /><button className="my-3 btn btn-primary w-100" type="submit" disabled={loading}>LOGIN</button></form>}
         {mode === "otp" && otpStep === "input" && <form className="w-75 mx-auto my-5" onSubmit={handleSendCode}><h2 className="text-center mb-3">OTP sign in</h2><label>Email or phone</label><input value={identifier} onChange={(e) => setIdentifier(e.target.value)} type="text" className="form-control" placeholder="phone/email" required /><button className="my-3 btn btn-primary w-100" type="submit" disabled={loading}>SEND OTP</button></form>}
         {mode === "otp" && otpStep === "verify" && <div className="w-75 mx-auto my-5 text-center"><p>Mã OTP đã gửi tới <strong>{identifier}</strong></p><OTPInputCustom value={otp} onChange={setOtp} /><button className="my-3 btn btn-primary w-100" type="button" onClick={handleVerifyOtp} disabled={otp.length !== 6 || loading}>VERIFY OTP</button><button className="btn btn-link" type="button" onClick={() => setOtpStep("input")}>Đổi thông tin</button></div>}
         <div ref={recaptchaContainerRef} id="recaptcha-container" /></div></div></div></section>
