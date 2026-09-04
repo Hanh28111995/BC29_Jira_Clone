@@ -2,6 +2,9 @@
   "name": "bc29new",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@tanstack/react-query": "^5.90.5",
     "@testing-library/jest-dom": "^5.16.4",
