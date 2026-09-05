@@ -1,120 +1,176 @@
 import { USER_KEY } from "../../constants/common";
-import { SET_USER_INFO, SET_DATE, SEARCH_USER, DEFAULT_CATEGORY, SET_EDIT_DATA, SET_SUBMIT, SET_MY_PROJECT, SET_TASK_DETAIL, SET_RENDER_DETAIL, SET_PROJECT_MEMLIST, SET_TASK_MODAL } from "../types/user.type";
+import { 
+  AuthActionTypes, 
+  ProjectTaskActionTypes, 
+  DefaultDataActionTypes 
+} from "../types/user.type";
 
-let userInfor = localStorage.getItem(USER_KEY);
-if (userInfor) {
-  userInfor = JSON.parse(userInfor);
+let userInfor = null;
+if (typeof window !== "undefined") {
+  const rawUser = localStorage.getItem(USER_KEY);
+  if (rawUser) {
+    try {
+      userInfor = JSON.parse(rawUser)?.userInfo || null;
+    } catch {
+      userInfor = null;
+    }
+  }
 }
-// const [_, setLoadingState] = useContext(LoadingContext);
+
+const savedAccessToken = (() => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.accessToken || parsed?.loginToken || null;
+  } catch {
+    return null;
+  }
+})();
+
 const DEFAULT_STATE = {
+  // Auth states
   userInfor,
+  accessToken: savedAccessToken,
+
+  // UI / Modal States
   setTaskModal: false,
   date: '',
-  list: [],
-  category: [],
+  
+  // Lists & Data
+  list: [],       
+  category: [],   
+  myProject: [],  
+  projectMemList: [],
+
+  // Project Edit Detail State
   detail: {
     title: '',
     setOpen: false,
-    infor: <hr />,
+    infor: null,
     data: {
       id: 0,
-      projectName: "string",
+      projectName: "",
       creator: 0,
-      description: "string",
-      categoryId: "string"
+      description: "",
+      categoryId: ""
+    },
+    metaData: {
+      taskType: [],
+      priority: [],
+      status: [],
+      projectCategory: [],
     },
   },
-  callBackSubmit: (propsValue) => { alert('edit demo') },
-  myProject: [],
-  reRenderDetail: true,
-  projectMemList: [],
-
+  
+  callBackSubmit: null,
+  reRenderDetail: false,  
   taskDetailModal: {
-    priorityTask: {
-      priorityId: 1,
-      priority: 'High'
-    },
-    taskTypeDetail: {
-      id: 1,
-      taskType: 'bug',
-    },
-    assigness: [
-      {
-        id: 2664,
-        avatar: 'https://ui-avatars.com/api/?name=Vo Thanh Nam',
-        name: 'Vo Thanh Nam',
-        alias: 'vo - thanh - nam'
-      },
-      {
-        id: 2664,
-        avatar: 'https://ui-avatars.com/api/?name=Vo Thanh Nam',
-        name: 'Vo Thanh Nam',
-        alias: 'vo - thanh - nam'
-      }
-    ],
+    priorityTask: null,
+    taskTypeDetail: null,
+    assigness: [],
     lstComment: [],
-    taskId: 5999,
-    taskName: 'Gau Gau',
-    alias: 'gau - gau',
-    description: '<p>stringxxxx</p>',
-    statusId: '2',
-    originalEstimate: 1,
-    timeTrackingSpent: 4,
-    timeTrackingRemaining: 8,
-    typeId: 1,
-    priorityId: 2,
-    projectId: 8018
+    taskId: null,
+    taskName: '',
+    alias: '',
+    description: '',
+    statusId: '',
+    originalEstimate: 0,
+    timeTrackingSpent: 0,
+    timeTrackingRemaining: 0,
+    typeId: null,
+    priorityId: null,
+    projectId: null
   },
 };
+
 export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
   switch (type) {
-    case SET_USER_INFO: {
-      state.userInfor = payload;
-      return { ...state };
-    }
-    case SET_DATE: {
-      state.date = payload;
-      return { ...state };
-    }
-    case SEARCH_USER: {
-      state.list = payload;
-      return { ...state };
-    }
-    case DEFAULT_CATEGORY: {
-      state.category = payload;
-      return { ...state };
-    }
-
-    case SET_EDIT_DATA: {
-      state.detail = payload;
-      return { ...state };
+    // Auth Group
+    case AuthActionTypes.SET_USER_INFO: {
+      const nextUserInfo = payload || null;
+      if (typeof window !== "undefined") {
+        try {
+          const current = localStorage.getItem(USER_KEY);
+          let merged = { accessToken: state.accessToken };
+          if (current) {
+            try { merged = { ...JSON.parse(current), ...merged, userInfo: nextUserInfo }; } catch { /* noop */ }
+          } else {
+            merged.userInfo = nextUserInfo;
+          }
+          localStorage.setItem(USER_KEY, JSON.stringify(merged));
+        } catch { /* noop */ }
+      }
+      return { ...state, userInfor: nextUserInfo };
     }
 
-    case SET_SUBMIT: {
-      state.callBackSubmit = payload;
-      return { ...state };
+    case AuthActionTypes.SET_TOKEN: {
+      const token = payload || null;
+      if (typeof window !== "undefined") {
+        try {
+          const current = localStorage.getItem(USER_KEY);
+          const parsed = current ? JSON.parse(current) : {};
+          parsed.accessToken = token;
+          delete parsed.loginToken;
+          localStorage.setItem(USER_KEY, JSON.stringify(parsed));
+        } catch { /* noop */ }
+      }
+      return { ...state, accessToken: token };
     }
-    case SET_MY_PROJECT: {
-      state.myProject = payload;
-      return { ...state };
+
+    case AuthActionTypes.SET_CREDENTIALS: {
+      const { accessToken, userInfo } = payload || {};
+      const nextToken = accessToken || null;
+      const nextUser = userInfo || null;
+      if (typeof window !== "undefined") {
+        try {
+          const toSave = { accessToken: nextToken, userInfo: nextUser };
+          localStorage.setItem(USER_KEY, JSON.stringify(toSave));
+        } catch { /* noop */ }
+      }
+      return { ...state, accessToken: nextToken, userInfor: nextUser };
     }
-    case SET_TASK_DETAIL: {
-      state.taskDetailModal = payload;
-      return { ...state };
+
+    case AuthActionTypes.CLEAR_AUTH: {
+      if (typeof window !== "undefined") {
+        try { localStorage.removeItem(USER_KEY); } catch { /* noop */ }
+      }
+      return { ...state, accessToken: null, userInfor: null };
     }
-    case SET_RENDER_DETAIL: {
-      state.reRenderDetail = payload;
-      return { ...state };
-    }
-    case SET_PROJECT_MEMLIST: {
-      state.projectMemList = payload;
-      return { ...state };
-    }
-    case SET_TASK_MODAL: {
-      state.setTaskModal = payload;
-      return { ...state };
-    }
-    
+
+    // Project & Task UI Group
+    case ProjectTaskActionTypes.SET_DATE: 
+      return { ...state, date: payload };
+
+    case ProjectTaskActionTypes.SEARCH_USER: 
+      return { ...state, list: payload };
+
+    case ProjectTaskActionTypes.SET_EDIT_DATA: 
+      return { ...state, detail: payload };
+
+    case ProjectTaskActionTypes.SET_SUBMIT: 
+      return { ...state, callBackSubmit: payload };
+
+    case ProjectTaskActionTypes.SET_MY_PROJECT: 
+      return { ...state, myProject: payload };
+
+      case ProjectTaskActionTypes.SET_TASK_DETAIL: 
+      return { ...state, taskDetailModal: payload };
+
+    case ProjectTaskActionTypes.SET_RENDER_DETAIL: 
+      return { ...state, reRenderDetail: payload };
+
+    case ProjectTaskActionTypes.SET_PROJECT_MEMLIST: 
+      return { ...state, projectMemList: payload };
+
+    case ProjectTaskActionTypes.SET_TASK_MODAL: 
+      return { ...state, setTaskModal: payload };
+
+    // DefaultData Group
+    case DefaultDataActionTypes.DEFAULT_CATEGORY: 
+      return { ...state, category: payload };
+
     default:
       return state;
   }
