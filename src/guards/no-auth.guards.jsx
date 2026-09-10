@@ -9,7 +9,7 @@ export default function NoAuthGuards() {
 
   useEffect(() => {
     if (userState.userInfor) {
-      navigate("/project-management/board")
+      navigate("/dashboard")
     }
   }, []);
   return (

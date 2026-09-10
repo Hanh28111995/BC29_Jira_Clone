@@ -6,8 +6,8 @@ import Router from "./routes";
 import { Suspense, useState } from "react";
 import { LoadingProvider } from "./contexts/loading.context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ModalEdit from "./pages/Modal/ModalEdit";
-import ModalDetailTask from "./components/ModalCyber/ModalDetailTask";
+import ModalEditProject from "./modules/Modals/Project/ModalEditProject";
+import ModalEditTask from "./modules/Modals/Task/ModalEditTask";
 
 const queryClient = new QueryClient();
 
@@ -17,9 +17,9 @@ function App() {
       <Suspense fallback={<></>}>
         <QueryClientProvider client={queryClient}>
           <LoadingProvider>
-          <ModalDetailTask/>
-          <ModalEdit />
-          <Router />
+            <ModalEditProject />
+            <ModalEditTask />
+            <Router />
           </LoadingProvider>
         </QueryClientProvider>
       </Suspense>

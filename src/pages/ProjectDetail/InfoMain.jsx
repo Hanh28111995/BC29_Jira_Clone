@@ -1,8 +1,5 @@
-import { useAsync } from 'hooks/useAsync'
-import React from 'react'
-import { useParams } from 'react-router-dom'
-import { fetchProjectDetailAPI } from 'services/project'
 
+import React from 'react'
 
 function InfoMain(props) {
     const renderAvatar = () => {

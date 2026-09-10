@@ -1,6 +1,5 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchGetTaskDetailAPI } from 'services/project';
 import { setTaskDetail, setTaskModal } from 'store/actions/user.action';
 import { LoadingContext } from 'contexts/loading.context';
 import { useContext } from 'react';
@@ -9,6 +8,7 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useState } from 'react';
 import _ from 'lodash';
 import { useEffect } from 'react';
+import { GetDetailProjectApi } from 'services/project';
 
 function ContentMain(props) {
   const dispatch = useDispatch();
@@ -17,7 +17,7 @@ function ContentMain(props) {
   const [state, setState] = useState()
   const fetchDetailTask = async (x) => {
     setLoadingState({ isLoading: true });
-    const result = await fetchGetTaskDetailAPI(x);
+    const result = await GetDetailProjectApi(x);
     setLoadingState({ isLoading: false });
     dispatch(setTaskDetail(result.data.content));
   }

@@ -1,7 +1,8 @@
 // export const TOKEN_CYBERSOFT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCAyOSIsIkhldEhhblN0cmluZyI6IjE5LzAxLzIwMjMiLCJIZXRIYW5UaW1lIjoiMTY3NDA4NjQwMDAwMCIsIm5iZiI6MTY0NTk4MTIwMCwiZXhwIjoxNjc0MjM0MDAwfQ.YESwad1hPeFZLi1alQUINpqBwiG-eLBBTADYwGZBfQc';
 export const TOKEN_CYBERSOFT = process.env.REACT_APP_TOKEN_CYBERSOFT || '';
 
-export const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
+// export const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
+export const BASE_URL = 'https://localhost:44310';
 export const USER_KEY = "USER_KEY";
 
 function removeVietnameseTones(str) {

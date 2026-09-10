@@ -3,9 +3,13 @@ import { BASE_URL, USER_KEY } from "../constants/common";
 import { getAuth } from "firebase/auth";
 
 export const request = axios.create({
-  proxy: false,    
+  // proxy: false,    
   baseURL: BASE_URL,
-  withCredentials: true,
+  // withCredentials: false,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
 });
 
 request.interceptors.request.use(async (config) => {  
@@ -17,25 +21,21 @@ request.interceptors.request.use(async (config) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }    
-      const auth = getAuth();
+    //   const auth = getAuth();      
+    //  const currentUser = await new Promise((resolve) => {        
+    //     if (auth.currentUser) return resolve(auth.currentUser);        
+    //     const unsubscribe = auth.onAuthStateChanged((user) => {
+    //       unsubscribe();
+    //       resolve(user);
+    //     });
+    //   });
       
-     const currentUser = await new Promise((resolve) => {
-        // Nếu có user sẵn rồi thì lấy luôn
-        if (auth.currentUser) return resolve(auth.currentUser);
-        // Nếu chưa có, đợi thằng onAuthStateChanged phát tín hiệu (chỉ nghe 1 lần duy nhất để tránh rò rỉ bộ nhớ)
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-          unsubscribe();
-          resolve(user);
-        });
-      });
-
-      // Nếu sau khi đợi mà tìm thấy user, tiến hành lấy token đóng gói vào header
-      if (currentUser) {        
-        const firebaseRealtimeToken = await currentUser.getIdToken();
-        if (firebaseRealtimeToken) {
-          config.headers["firebase-token"] = firebaseRealtimeToken;
-        }
-      }
+    //   if (currentUser) {        
+    //     const firebaseRealtimeToken = await currentUser.getIdToken();
+    //     if (firebaseRealtimeToken) {
+    //       config.headers["firebase-token"] = firebaseRealtimeToken;
+    //     }
+    //   }
     } catch (error) {
       console.error("Lỗi xử lý gửi token bảo mật:", error);
     }

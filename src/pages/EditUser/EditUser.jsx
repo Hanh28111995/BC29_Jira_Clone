@@ -1,4 +1,4 @@
-import UserForm from 'modules/UserForm/UserForm';
+import UserForm from 'modules/Forms/UserForm';
 import React from 'react';
 
 function EditUser() {

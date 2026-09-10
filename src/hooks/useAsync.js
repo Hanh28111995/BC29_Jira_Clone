@@ -2,7 +2,12 @@ import { useContext, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingContext } from "../contexts/loading.context";
 
-const normalizeResult = (result) => result?.data?.content ?? result?.content ?? result;
+const normalizeResult = (result) =>
+  result?.data?.resultObject ??
+  result?.resultObject ??
+  result?.data?.content ??
+  result?.content ??
+  result;
 
 const normalizeQueryKey = (service, dependencies = []) => [
   typeof service === "string" ? service : service?.name || "useAsync",

@@ -1,20 +1,14 @@
-import { Editor } from '@tinymce/tinymce-react'
+import { Editor } from '@tinymce/tinymce-react';
 import { LoadingContext } from 'contexts/loading.context';
 import { withFormik } from 'formik';
-import { useAsync } from 'hooks/useAsync';
-import React from 'react'
-import { useContext } from 'react';
-import { useEffect } from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import React, { useContext, useEffect } from 'react';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchUpdateProjectDetailAPI } from 'services/project';
-import { fetchProjectCategoryAPI } from 'services/project';
-import { setCategory, setEditDataProject, setEditSubmit } from 'store/actions/user.action';
+import { setEditSubmit } from 'store/actions/user.action';
 import * as Yup from 'yup';
 
-
-function EditForm(props) {
-
+function ProjectEditForm(props) {
     const userState = useSelector((state) => state.userReducer);
     const dispatch = useDispatch();
 
@@ -26,43 +20,28 @@ function EditForm(props) {
     } = props;
 
     const submitForm = () => {
-        // e.preventDefault();
         handleSubmit();
-    }
-
-    const { state: CategoryList = [] } = useAsync({
-        dependencies: [],
-        service: () => fetchProjectCategoryAPI(),
-    })
+    };
 
     useEffect(() => {
-
-        dispatch(setEditSubmit(submitForm))
-    }, [])
-
-
-    useEffect(() => {
-        // console.log(values)
-
-        if (CategoryList.length) {
-            dispatch(setCategory(CategoryList));
-        }
-    }, [CategoryList])
-
+        // Đẩy hàm submit ra ngoài để Modal tổng có thể gọi khi bấm nút Save/OK
+        dispatch(setEditSubmit(submitForm));
+    }, []);
 
     const handleEditorChange = (content, editor) => {
-        setFieldValue('description', content)
-    }
+        setFieldValue('description', content);
+    };
 
-    // const { id, projectName, description, categoryId } = values.;
     return (
-
-        <form className='container' onSubmit={submitForm} onChange={handleChange} >
+        <form className='container' onSubmit={submitForm} onChange={handleChange}>
             <div className='row'>
                 <div className='col-4'>
                     <div className='form-group'>
                         <p className='font-weight-bold'>Project Id</p>
-                        <input disabled className='form-control' name='id'
+                        <input 
+                            disabled 
+                            className='form-control' 
+                            name='id'
                             value={values.id}
                             onChange={handleChange}
                         />
@@ -71,19 +50,25 @@ function EditForm(props) {
                 <div className='col-4'>
                     <div className='form-group'>
                         <p className='font-weight-bold'>Project Name</p>
-                        <input className='form-control' name='projectName'
+                        <input 
+                            className='form-control' 
+                            name='projectName'
                             value={values.projectName}
-                            onChange={handleChange} />
+                            onChange={handleChange} 
+                        />
                     </div>
                 </div>
                 <div className='col-4'>
                     <div className='form-group'>
                         <p className='font-weight-bold'>Category</p>
-                        <select name="categoryId" className='form-control'
-                            defaultValue={values.categoryId}
-                            onChange={handleChange}>
+                        <select 
+                            name="categoryId" 
+                            className='form-control'
+                            value={values.categoryId} // Sửa từ defaultValue thành value để Formik kiểm soát chuẩn xác
+                            onChange={handleChange}
+                        >
                             {
-                                userState?.category.map((item, index) => {
+                                userState?.category?.map((item, index) => {
                                     return <option value={item.id} key={index}>{item.projectCategoryName}</option>
                                 })
                             }
@@ -115,51 +100,48 @@ function EditForm(props) {
                     </div>
                 </div>
             </div>
-
         </form>
-    )
+    );
 }
-const CreateProjectForm = withFormik({
+
+const ProjectEditFormik = withFormik({
     enableReinitialize: true,
     mapPropsToValues: (props) => {
-        console.log(props.projectEdit)
         return {
-            id: props.projectEdit.id,
-            projectName: props.projectEdit.projectName,
-            creator: props.projectEdit.creator,
-            description: props.projectEdit.description,
-            categoryId: props.projectEdit.categoryId,
+            id: props.projectEdit?.id || '',
+            projectName: props.projectEdit?.projectName || '',
+            creator: props.projectEdit?.creator || '',
+            description: props.projectEdit?.description || '',
+            categoryId: props.projectEdit?.categoryId || '',
         }
     },
     validationSchema: Yup.object().shape({
-
+        projectName: Yup.string().required('Project name is required!'),
     }),
-    handleSubmit: async (values, { props, setSubmitting }) => {
-
+    handleSubmit: async (values, { props }) => {
         try {
             props.setLoadingState(true);
             await fetchUpdateProjectDetailAPI(props.projectEdit.id, values);
             props.setLoadingState(false);
-        }
-        catch
-        {
-            console.log("HELLO");
+            // Có thể thêm thông báo thành công hoặc đóng modal tại đây nếu cần
+        } catch (err) {
+            props.setLoadingState(false);
+            console.log("Error updating project:", err);
         }
     },
-    displayName: 'CreateProjectFormit',
-})(EditForm)
+    displayName: 'ProjectEditFormik',
+})(ProjectEditForm);
 
-const CreateProjectWrapper = (props) => {
+const ProjectEditWrapper = (props) => {
     const navigate = useNavigate();
     const [_, setLoadingState] = useContext(LoadingContext);
 
-    return <CreateProjectForm navigate={navigate} setLoadingState={setLoadingState} {...props} />
+    return <ProjectEditFormik navigate={navigate} setLoadingState={setLoadingState} {...props} />;
 }
 
-
 const mapStateToProps = (state) => ({
-    projectEdit: state.userReducer.detail.data
-})
+    projectEdit: state.userReducer.detail.data,
+    // Không cần lấy category ở đây nữa vì bên trong component đã dùng useSelector gọi trực tiếp userState.category
+});
 
-export default connect(mapStateToProps)(CreateProjectWrapper);
-
+export default connect(mapStateToProps)(ProjectEditWrapper);

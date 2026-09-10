@@ -2,21 +2,21 @@ import { request } from "../../configs/axios";
 
 const GetAllProjectCategoryApi = () => {
   return request({
-    url: '/api/ProjectCategory/get-all',
+    url: '/api/Category/get-all',
     method: 'GET',
   });
 };
 
 const GetDetailProjectCategoryApi = (id) => {
   return request({
-    url: `/api/ProjectCategory/get-by-id/${id}`,
+    url: `/api/Category/get-by-id/${id}`,
     method: 'GET',
   });
 };
 
 const AddProjectCategoryApi = (data) => {
   return request({
-    url: '/api/ProjectCategory/create',
+    url: '/api/Category/create',
     method: 'POST',
     data,
   });
@@ -24,7 +24,7 @@ const AddProjectCategoryApi = (data) => {
 
 const UpdateProjectCategoryApi = (id, data) => {
   return request({
-    url: `/api/ProjectCategory/update/${id}`,
+    url: `/api/Category/update/${id}`,
     method: 'PUT',
     data,
   });
@@ -32,7 +32,7 @@ const UpdateProjectCategoryApi = (id, data) => {
 
 const DeleteProjectCategoryApi = (id) => {
   return request({
-    url: `/api/ProjectCategory/delete/${id}`,
+    url: `/api/Category/delete/${id}`,
     method: 'DELETE',
   });
 };

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setProjectMemList, setReRenderDetail } from 'store/actions/user.action';
 import { DragDropContext } from 'react-beautiful-dnd';
 
-function DetailBoard() {
+export default function DetailBoard() {
   const param = useParams();
   const dispatch = useDispatch()
   const userState = useSelector(state => state.userReducer)
@@ -50,10 +50,6 @@ function DetailBoard() {
       <ContentMain projectDetail={projectDetail} />
 
     </div>
-
-
-
   )
 }
 
-export default DetailBoard

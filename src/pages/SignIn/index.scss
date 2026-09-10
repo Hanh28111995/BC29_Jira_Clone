@@ -1,0 +1,90 @@
+.app-layout-root {
+  --global-width-icon: 80px;
+  --global-width-expand: 220px;
+  
+  --project-width-icon: 70px;
+  --project-width-expand: 240px;
+
+  --current-global-width: var(--global-width-icon);
+  --current-project-width: var(--project-width-icon);
+
+  &.global-expanded {
+    --current-global-width: var(--global-width-expand);
+    --current-project-width: var(--project-width-icon);
+  }
+
+  &.project-expanded {
+    --current-global-width: var(--global-width-icon);
+    --current-project-width: var(--project-width-expand);
+  }
+
+  // 1. Sider 1 (Global Sider)
+  .custom-global-sider {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    width: var(--current-global-width) !important;
+    min-width: var(--current-global-width) !important;
+    max-width: var(--current-global-width) !important;
+    // Hiệu ứng transition mượt mà khi width thay đổi (khi click)
+    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+
+    // Hiệu ứng nhẹ khi hover vào Sider ở trạng thái thu gọn
+    &:hover {
+      filter: brightness(1.05);
+    }
+  }
+
+  // 2. Sider 2 (Project Sider)
+  .custom-project-sider {
+    position: fixed !important;
+    left: var(--current-global-width) !important;
+    top: 0;
+    bottom: 0;
+    z-index: 90;
+    width: var(--current-project-width) !important;
+    min-width: var(--current-project-width) !important;
+    max-width: var(--current-project-width) !important;
+    border-right: 1px solid #e8e8e8;
+    // Hiệu ứng mượt mà cho cả width lẫn vị trí left khi Sider 1 thay đổi kích thước
+    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), left 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+
+    // Xử lý logo thu nhỏ/phóng to khi Sider 2 đóng/mở
+    .app-layout-root:not(.project-expanded) & {
+      .ant-image {
+        transform: scale(0.6);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+      }
+    }
+    
+    .app-layout-root.project-expanded & {
+      .ant-image {
+        transform: scale(1);
+        opacity: 1;
+        transition: all 0.3s ease;
+      }
+    }
+  }
+
+  // 3. Main Content Wrapper
+  .main-content-wrapper {
+    margin-left: calc(var(--current-global-width) + var(--current-project-width));
+    transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
+    min-height: 100vh;
+    background: transparent;
+
+    .main-content-body {
+      padding: 0 16px;
+      overflow-y: auto;
+    }
+  }
+}

@@ -1,20 +1,20 @@
-import Register from "pages/register/Register";
 import PageNotFound from "pages/PageNotFound/PageNotFound";
-
 import React, { lazy } from "react";
-
 import { useRoutes, Navigate } from "react-router-dom";
-import ProjectTable from "modules/project-table/ProjectTable";
-import CreateProjectTable from "pages/CreateProject/CreateProject";
-import MBoard from "pages/ProjectDetail/MBoard";
+import ProjectTable from "modules/Tables/ProjectTable";
 import DetailBoard from "pages/ProjectDetail/DetailBoard";
-import UserTable from "modules/user-table/UserTable";
+import UserTable from "modules/Tables/UserTable";
 import EditUser from "pages/EditUser/EditUser";
+import ChatPage from "pages/Chat/ChatPage";
+import CreateProject from "pages/CreateProject/CreateProject";
+import ProjectManagement from "pages/Management/ProjectManagement";
+import TaskManagement from "pages/Management/TaskManagement";
+import Dashboard from "pages/Dashboard/Dashboard";
 
-const Login = lazy(() => import("pages/login/Login"));
+const Login = lazy(() => import("pages/SignIn/Login"));
 const AuthGuards = lazy(() => import("guards/auth.guards"));
 const NoAuthGuards = lazy(() => import("guards/no-auth.guards"));
-const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
+const HomeLayout = lazy(() => import("../layouts/HomeLayout"));
 
 export default function Router() {
   const routing = useRoutes([
@@ -29,7 +29,7 @@ export default function Router() {
         {
           path: "/login",
           element: <Login />,
-        },        
+        },
       ],
     },
     {
@@ -37,50 +37,63 @@ export default function Router() {
       element: <AuthGuards />,
       children: [
         {
-          path: "/project-management",
-          element: <AdminLayout />,
+          path: "/",
+          element: <HomeLayout />,
           children: [
             {
-              path: "/project-management/user",
+              path: "/user-management",
               element: <UserTable />,
             },
             {
-              path: "/project-management/UserEdit/:userId",
+              path: "/user-management/edit-user/:userId",
               element: <EditUser />,
             },
             {
-              path: "/project-management/UserCreate",
+              path: "/user-management/create",
               element: <EditUser />,
             },
+            // 1/////////////////////////////
             {
-              path: "/project-management/project",
-              element: <ProjectTable />,
+              path: "/project-management",
+              element: <ProjectManagement />,
             },
             {
-              path: "/project-management/create-project",
-              element: <CreateProjectTable />,
-            },
-            {
-              path: "/project-management/board",
-              element: <MBoard />,
-            },
-            {
-              path: "/project-management/project-detail/:projectId",
+              path: "/project-management/project/:projectId",
               element: <DetailBoard />,
             },
-          ]
-        },
+            {
+              path: "/project-management/create",
+              element: <CreateProject />,
+            },
 
+            // 2 //////////////////////////////////
+
+{
+              path: "/task-management",
+              element: <TaskManagement />,
+            },
+
+
+            {
+              path: "/dashboard",
+              element: <Dashboard />,
+            },
+            {
+              path: "/chat",
+              element: <ChatPage />,
+            },
+          ],
+        },
+        {},
       ],
     },
-
 
     //   ],
     // },
 
     {
-      path: '*',
-      element: <PageNotFound />
+      path: "*",
+      element: <PageNotFound />,
     },
   ]);
   return routing;

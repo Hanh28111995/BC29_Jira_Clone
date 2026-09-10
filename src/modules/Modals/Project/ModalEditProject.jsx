@@ -1,49 +1,56 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { calculateNewValue } from '@testing-library/user-event/dist/utils';
 import { Button, Col, DatePicker, Drawer, Form, Input, Row, Select, Space } from 'antd';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { setEditDataProject, setEditSubmit } from 'store/actions/user.action';
 import "./index.scss";
+
 const { Option } = Select;
 
-function ModalEdit() {
+export default function ModalEditProject() {
     const userState = useSelector((state) => state.userReducer);
     const dispatch = useDispatch();
     const navigate = useNavigate();
  
     const onSave = () => {
-        userState.callBackSubmit();
+        if (userState?.callBackSubmit) {
+            userState.callBackSubmit();
+        }
         onClose();
         navigate(0);
     }
+
     const onClose = () => {
-        dispatch(setEditDataProject(
-            {
-                detail: {
-                    setOpen: false,
-                    infor: <hr />,
-                    data: {
-                        id: 0,
-                        projectName: "string",
-                        creator: 0,
-                        description: "string",
-                        categoryId: "string"
-                    },
-                },
-            }));
-        dispatch(setEditSubmit((propsValue) => { alert('click demo') },
-        ));
+        // Sửa lại cấu trúc dispatch khớp với state projectModal
+        dispatch(setEditDataProject({
+            title: '',
+            setOpen: false,
+            infor: null,
+            data: {
+                id: 0,
+                projectName: "",
+                creator: 0,
+                description: "",
+                categoryId: ""
+            }
+        }));
+        
+        if (typeof setEditSubmit === 'function') {
+            dispatch(setEditSubmit((propsValue) => { alert('click demo') }));
+        }
     };
+
+    // Lấy an toàn từ projectModal thay vì detail
+    const projectModal = userState?.projectModal || {};
 
     return (
         <>
             <Drawer
-                title={userState.detail.title}
+                title={projectModal.title}
                 width={'85%'}
                 onClose={onClose}
-                open={userState.detail.setOpen}
+                open={projectModal.setOpen}
                 bodyStyle={{
                     paddingBottom: 80,
                 }}
@@ -56,10 +63,8 @@ function ModalEdit() {
                     </Space>
                 }
             >
-                {userState.detail.infor}
+                {projectModal.infor}
             </Drawer>
         </>
     )
 }
-
-export default ModalEdit

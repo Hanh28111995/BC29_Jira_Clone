@@ -28,21 +28,57 @@ const setDate = (date) => ({
     payload: date,
 });
 
-const userSearch = (list) => ({
+const setuserSearch = (list) => ({
     type: ProjectTaskActionTypes.SEARCH_USER,
     payload: list,
 });
 
 const setCategory = (clist) => ({
-    type: DefaultDataActionTypes.DEFAULT_CATEGORY,
+    type: DefaultDataActionTypes.SET_CATEGORY_LIST, // Cập nhật lại type cho khớp với DefaultDataActionTypes
     payload: clist,
 });
 
+// Action cũ (có thể giữ lại nếu project cũ đang dùng, hoặc thay thế dần)
 const setEditDataProject = (data) => ({
     type: ProjectTaskActionTypes.SET_EDIT_DATA,
     payload: data,
 });
 
+// ==========================================
+// CÁC ACTIONS MỚI CHO MODAL & METADATA TÁCH BIỆT
+// ==========================================
+
+// Action mở/cập nhật Modal Project
+const setProjectModal = (data) => ({
+    type: ProjectTaskActionTypes.SET_PROJECT_MODAL,
+    payload: data,
+});
+
+// Action mở/cập nhật Modal Task Edit
+const setTaskModalEdit = (data) => ({
+    type: ProjectTaskActionTypes.SET_TASK_MODAL_EDIT,
+    payload: data,
+});
+
+// Các Action cập nhật Metadata vào nhóm riêng biệt
+const setTaskTypeList = (data) => ({
+    type: DefaultDataActionTypes.SET_TASKTYPE_LIST,
+    payload: data,
+});
+
+const setPriorityList = (data) => ({
+    type: DefaultDataActionTypes.SET_PRIORITY_LIST,
+    payload: data,
+});
+
+const setStatusList = (data) => ({
+    type: DefaultDataActionTypes.SET_STATUS_LIST,
+    payload: data,
+});
+
+// ==========================================
+// CÁC ACTIONS HIỆN TẠI KHÁC
+// ==========================================
 const setEditSubmit = (data) => ({
     type: ProjectTaskActionTypes.SET_SUBMIT,
     payload: data,
@@ -79,9 +115,16 @@ export {
     setCredentialsAction,
     clearAuthAction,
     setDate,
-    userSearch,
+    setuserSearch,
     setCategory,
     setEditDataProject,
+    // Export thêm các actions mới
+    setProjectModal,
+    setTaskModalEdit,
+    setTaskTypeList,
+    setPriorityList,
+    setStatusList,
+    // Các actions cũ giữ nguyên
     setEditSubmit,
     setMyProject,
     setTaskDetail,

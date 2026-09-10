@@ -1,48 +1,28 @@
 import { Editor } from '@tinymce/tinymce-react';
-import { withInfo } from 'antd/lib/modal/confirm';
-import { withFormik, yupToFormErrors } from 'formik';
-import { useAsync } from 'hooks/useAsync';
-import React, { useRef } from 'react';
-import { useEffect } from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { fetchCreateProjectAPI } from 'services/project';
-import { fetchProjectCategoryAPI } from 'services/project';
-import { setCategory } from 'store/actions/user.action';
+import { withFormik } from 'formik';
+import React, { useContext } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { LoadingContext } from 'contexts/loading.context';
 import * as Yup from 'yup';
-import { useContext } from 'react';
 import { notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import './index.scss'
+import './index.scss';
+import { fetchCreateProjectAPI } from 'services/project';
 
-
-function CreateProjectTable(props) {
-  const navigate = useNavigate();
+function CreateProject(props) {
   const userState = useSelector((state) => state.userReducer);
-  const { state: CategoryList = [] } = useAsync({
-    dependencies: [],
-    service: () => fetchProjectCategoryAPI(),
-  })
-
-
-  const dispatch = useDispatch();
-
+  
   const {
     values,
     handleChange,
     handleSubmit,
     setFieldValue,
+    ListCategory, // Lấy từ mapStateToProps xuống
   } = props;
 
-  useEffect(() => {
-    if (CategoryList.length) {
-      dispatch(setCategory(CategoryList));
-    }
-  }, [CategoryList])
-
   const handleEditorChange = (content, editor) => {
-    setFieldValue('description', content)
-  }
+    setFieldValue('description', content);
+  };
 
   return (
     <div className=''>
@@ -50,13 +30,13 @@ function CreateProjectTable(props) {
       <form className='form_createProject w-100' onSubmit={handleSubmit} onChange={handleChange}>
         <div className='form-group'>
           <p>Name</p>
-          <input className='form-control' name='projectName' />
+          <input className='form-control' name='projectName' value={values.projectName} />
         </div>
         <div className='form-group w-100'>
           <p>Description</p>
           <Editor
             name='description'
-            initialValue="<p>This is the initial content of the editor.</p>"
+            value={values.description}
             init={{
               height: 500,
               menubar: false,
@@ -75,9 +55,9 @@ function CreateProjectTable(props) {
           />
         </div>
         <div className='form-group'>
-          <select name="categoryId" className='form-control' onChange={handleChange}>
+          <select name="categoryId" className='form-control' value={values.categoryId} onChange={handleChange}>
             {
-              userState?.category.map((item, index) => {
+              ListCategory?.map((item, index) => {
                 return <option value={item.id} key={index}>{item.projectCategoryName}</option>
               })
             }
@@ -86,52 +66,50 @@ function CreateProjectTable(props) {
         <button className='btn btn-outline-primary' type='submit'>Create Project</button>
       </form>
     </div>
-  )
+  );
 }
-
 
 const CreateProjectForm = withFormik({
   enableReinitialize: true,
   mapPropsToValues: (props) => {
-    // console.log('props', props.ListCategory)
     return {
       projectName: '',
       description: '',
-      categoryId: props.ListCategory[0]?.id,
+      categoryId: props.ListCategory[0]?.id || '',
     }
   },
   validationSchema: Yup.object().shape({
-
+    projectName: Yup.string().required('Project name is required!'),
   }),
-  handleSubmit: async (values, { props, setSubmitting }) => {
-
+  handleSubmit: async (values, { props }) => {
     try {
-      props.setLoadingState(true);
+      props.setLoadingState({ isLoading: true });
       await fetchCreateProjectAPI(values);
-      props.setLoadingState(false);
+      props.setLoadingState({ isLoading: false });
+      
+      notification.success({ description: "Create Project Successfully!" });
+      props.navigate('/project-management/project');
     }
     catch (err) {
+      props.setLoadingState({ isLoading: false });
       notification.warning({
-        description: `${err.response.data.content}`,
+        description: `${err?.response?.data?.content || "An error occurred"}`,
       });
     }
-
-    props.navigate('/project-management/board')
-    // console.log(props.navigate, "HELLO"); // cho nay goi dc navigate r ne a
   },
   displayName: 'CreateProjectFormit',
-})(CreateProjectTable)
+})(CreateProject);
 
 const CreateProjectWrapper = (props) => {
   const navigate = useNavigate();
   const [_, setLoadingState] = useContext(LoadingContext);
 
-  return <CreateProjectForm navigate={navigate} setLoadingState={setLoadingState} {...props} />
+  return <CreateProjectForm navigate={navigate} setLoadingState={setLoadingState} {...props} />;
 }
 
-
 const mapStateToProps = (state) => ({
-  ListCategory: state.userReducer.category
-})
+  // Lấy trực tiếp projectCategory từ metaData trong Redux Store
+  ListCategory: state.userReducer.metaData.projectCategory
+});
 
 export default connect(mapStateToProps)(CreateProjectWrapper);

@@ -2,12 +2,16 @@
 export const ProjectTaskActionTypes = {
     SET_DATE: "SET_DATE",
     SEARCH_USER: "SEARCH_USER",
-    SET_EDIT_DATA: "SET_EDIT_DATA",
+    SET_EDIT_DATA: "SET_EDIT_DATA", // Có thể giữ lại hoặc dần thay thế bằng 2 type bên dưới
     SET_MY_PROJECT: "SET_MY_PROJECT",
     SET_TASK_DETAIL: "SET_TASK_DETAIL",
     SET_RENDER_DETAIL: "SET_RENDER_DETAIL",
     SET_PROJECT_MEMLIST: "SET_PROJECT_MEMLIST",
     SET_TASK_MODAL: "SET_TASK_MODAL",
+    
+    // Thêm 2 types mới để phân tách rõ modal Project và Task Edit
+    SET_PROJECT_MODAL: "SET_PROJECT_MODAL",
+    SET_TASK_MODAL_EDIT: "SET_TASK_MODAL_EDIT",
 };
 
 // //// 2. Auth Group
@@ -18,7 +22,7 @@ export const AuthActionTypes = {
     CLEAR_AUTH: "CLEAR_AUTH",
 };
 
-// /// 3. DefaultData Group (Metadata)
+// /// 3. DefaultData Group (Metadata) - Sẵn có các types này
 export const DefaultDataActionTypes = {
     SET_TASKTYPE_LIST: "SET_TASKTYPE_LIST",
     SET_CATEGORY_LIST: "SET_CATEGORY_LIST",
