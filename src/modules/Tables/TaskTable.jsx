@@ -28,7 +28,7 @@ export default function TaskTable() {
   const [searchText, setSearchText] = useState("");
   const [toggle, setToggle] = useState(false);
   const [loadingState, setLoadingState] = useState({ isLoading: false });
-  
+
   const userState = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -61,11 +61,11 @@ export default function TaskTable() {
   // ==========================================
   const handleDeleteTask = (projectId, taskId) => {
     Modal.confirm({
-      title: 'Are you sure you want to delete this task?',
-      content: 'This action cannot be undone.',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
+      title: "Are you sure you want to delete this task?",
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
       async onOk() {
         try {
           setLoadingState({ isLoading: true });
@@ -87,14 +87,18 @@ export default function TaskTable() {
   const handleEditTask = async (projectId, taskId) => {
     try {
       const result = await GetDetailTaskApi(projectId, taskId);
-      const taskDetail = result?.data?.resultObject ?? result?.resultObject ?? result?.data?.content ?? {};
-      
+      const taskDetail =
+        result?.data?.resultObject ??
+        result?.resultObject ??
+        result?.data?.content ??
+        {};
+
       dispatch(
         setTaskModal({
           title: "Edit Task",
           setOpen: true,
           infor: <TaskForm mode="edit" initialData={taskDetail} />,
-        })
+        }),
       );
     } catch (error) {
       notification.error({ description: "Cannot load task details!" });
@@ -110,29 +114,81 @@ export default function TaskTable() {
       setTaskModal({
         title: "Create Task",
         setOpen: true,
-        infor: <TaskForm mode="create" initialData={{ projectId, ...initialTaskDetailModal }} />,
-      })
+        infor: (
+          <TaskForm
+            mode="create"
+            initialData={{ projectId, ...initialTaskDetailModal }}
+          />
+        ),
+      }),
     );
   };
 
   // ==========================================
+  // Gom nhóm task theo projectId từ mảng phẳng của res
+  // ==========================================
+  const groupedProjects = {};
+  taskList.forEach((item) => {
+    const pId = item.projectId;
+    const pName =
+      item.projectName ||
+      item.project?.projectName ||
+      item.Project?.projectName;
+
+    if (!groupedProjects[pId]) {
+      groupedProjects[pId] = {
+        projectId: pId,
+        projectName: pName,
+        tasks: [],
+      };
+    }
+    groupedProjects[pId].tasks.push(item);
+  });
+
+  // Tạo dataSource chuẩn chỉnh cho Table, đảm bảo key hoàn toàn duy nhất
+  const dataSource = [];
+  Object.values(groupedProjects).forEach((proj, projIndex) => {
+    // 1. Dòng Header của Dự án
+    dataSource.push({
+      key: `project-${proj.projectId}-${projIndex}`,
+      isProjectHeader: true,
+      projectId: proj.projectId,
+      projectName: proj.projectName,
+    });
+
+    // 2. Các dòng Task con bên trong
+    proj.tasks.forEach((task, taskIndex) => {
+      dataSource.push({
+        ...task,
+        key: `task-${task.id ?? taskIndex}-${proj.projectId}-${projIndex}`,
+        isProjectHeader: false,
+      });
+    });
+  });
+
+  // ==========================================
   // Cấu hình cột bảng Task
   // ==========================================
+
   const columns = [
     {
       title: "TASK NAME / PROJECT",
       dataIndex: "taskName",
       key: "taskName",
       render: (text, record) => {
-        if (record.isProjectHeader) {
+        if (record.isProjectHeader) {          
           return (
-            <Space style={{ fontWeight: 600, fontSize: "14px", color: "#1890ff" }}>
-              <FolderOutlined />
-              <span>{record.projectName}</span>
+            <Space
+              style={{ fontWeight: 600, fontSize: "14px", color: "#1890ff" }}
+            >
+              <FolderOutlined style={{'paddingBottom':'6px'}} />              
+              <span>{record.projectName || "Unnamed Project"}</span>
             </Space>
           );
         }
-        return <span style={{ paddingLeft: "24px", fontWeight: 400 }}>- {text}</span>;
+        return (
+          <span style={{ paddingLeft: "24px", fontWeight: 400 }}>- {text}</span>
+        );
       },
     },
     {
@@ -170,9 +226,8 @@ export default function TaskTable() {
           return (
             <Button
               type="primary"
-              size="small"
-              ghost
-              icon={<PlusOutlined />}
+              size="small"              
+              ghost              
               onClick={() => handleCreateTask(record.projectId)}
             >
               Create Task
@@ -199,45 +254,6 @@ export default function TaskTable() {
     },
   ];
 
-  // ==========================================
-  // Gom nhóm task theo projectId từ mảng phẳng của res
-  // ==========================================
-  const groupedProjects = {};
-  taskList.forEach((item) => {
-    const pId = item.projectId ;
-    const pName = item.projectName ;
-
-    if (!groupedProjects[pId]) {
-      groupedProjects[pId] = {
-        projectId: pId,
-        projectName: pName,
-        tasks: [],
-      };
-    }
-    groupedProjects[pId].tasks.push(item);
-  });
-
-  // Tạo dataSource chuẩn chỉnh cho Table, đảm bảo key hoàn toàn duy nhất
-  const dataSource = [];
-  Object.values(groupedProjects).forEach((proj, projIndex) => {
-    // 1. Dòng Header của Dự án
-    dataSource.push({
-      key: `project-${proj.projectId}-${projIndex}`,
-      isProjectHeader: true,
-      projectId: proj.projectId,
-      projectName: proj.projectName,
-    });
-    
-    // 2. Các dòng Task con bên trong
-    proj.tasks.forEach((task, taskIndex) => {
-      dataSource.push({
-        ...task,
-        key: `task-${task.id ?? taskIndex}-${proj.projectId}-${projIndex}`,
-        isProjectHeader: false,
-      });
-    });
-  });
-
   return (
     <>
       <Card
@@ -245,7 +261,13 @@ export default function TaskTable() {
         style={{ boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
         bodyStyle={{ padding: "16px 24px" }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "16px",
+          }}
+        >
           <Input
             placeholder="Search tasks..."
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
@@ -256,16 +278,18 @@ export default function TaskTable() {
           />
         </div>
 
-        <Table 
-          columns={columns} 
-          dataSource={dataSource.filter(item => {
+        <Table
+          columns={columns}
+          dataSource={dataSource.filter((item) => {
             if (!searchText) return true;
             if (item.isProjectHeader) return true; // Giữ lại tiêu đề nhóm khi tìm kiếm
-            return item.taskName?.toLowerCase().includes(searchText.toLowerCase());
-          })} 
-          pagination={false} 
+            return item.taskName
+              ?.toLowerCase()
+              .includes(searchText.toLowerCase());
+          })}
+          pagination={false}
         />
-      </Card>      
+      </Card>
     </>
   );
 }
