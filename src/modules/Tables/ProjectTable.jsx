@@ -5,7 +5,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined, CloseCircleTwoTone } from "@ant-design/icons";
 import { removeVietnameseTones } from 'constants/common';
 import { LoadingContext } from 'contexts/loading.context';
-import { setEditDataProject, setMyProject, setuserSearch } from 'store/actions/user.action';
+import { setMyProject, setProjectModal, setuserSearch } from 'store/actions/user.action';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchProjectListAPI,
@@ -13,8 +13,10 @@ import {
   fetchDeleteProjectAPI,
   fetchRemoveUserFromProjectAPI,
   fetchProjectDetailAPI,
+  DeleteProjectApi,
+  GetDetailProjectApi,
 } from 'services/project';
-import ProjectEditForm from 'modules/Forms/ProjectEditForm';
+import ProjectForm from 'modules/Forms/ProjectForm';
 
 const { Search } = Input;
 
@@ -28,7 +30,7 @@ function ProjectTable() {
 
   // Danh sách user & category trong Redux (đã nạp lúc login / dashboard)
   const userPool = Array.isArray(userState.list) ? userState.list : [];
-  const categories = Array.isArray(userState.metaData?.projectCategories) ? userState.metaData.projectCategories : [];
+  const categories = Array.isArray(userState.metaData?.category) ? userState.metaData?.category : [];
   const currentUserId = userState.userInfor?.id;
 
   const { state } = useAsync({
@@ -52,7 +54,6 @@ function ProjectTable() {
     setProjectList(data);
   }, [data]);
 
-  // Lọc user từ Redux thay vì gọi API
   const fetchGetUser = (keyword) => {
     if (!keyword.trim()) {
       dispatch(setuserSearch([]));
@@ -81,41 +82,53 @@ function ProjectTable() {
 
   const handleDeleteProject = async (id) => {
     setLoadingState({ isLoading: true });
-    await fetchDeleteProjectAPI(id);
+    await DeleteProjectApi(id);
     setLoadingState({ isLoading: false });
     notification.success({ description: "Delete Successfully!" });
     setToggle((t) => !t);
-    navigate("/project-management/project");
+    navigate("/project-management");
   };
 
-  const handleEditProject = async (id) => {
-    setLoadingState({ isLoading: true });
-    const result = await fetchProjectDetailAPI(id);
-    setLoadingState({ isLoading: false });
-    const p = result?.data?.resultObject ?? result?.resultObject ?? result?.data?.content ?? {};
-    dispatch(
-      setEditDataProject({
-        title: "Edit Project",
-        setOpen: true,
-        infor: <ProjectEditForm />,
-        data: {
-          id: p.id,
-          projectName: p.projectName,
-          creatorId: p.creatorId,
-          description: p.description,
-          categoryId: p.categoryId,
-        },
-      }),
-    );
-  };
   
-  const creatorName = (creatorId) => {
-    console.log("userPool:", userPool, "categories:", categories);
+const handleEditProject = async (id) => {  
+  const result = await GetDetailProjectApi(id);  
+  const p = result?.data?.resultObject ?? result?.resultObject ?? result?.data?.content ?? {};
+  console.log("handleEditProject -> p", p);
+  dispatch(
+    setProjectModal({
+      title: "Edit Project",
+      setOpen: true,
+      infor: <ProjectForm mode="edit" initialData={{
+        id: p.id,
+        projectName: p.projectName,
+        creatorId: p.creator.id,
+        description: p.description,
+        categoryId: p.categoryId,
+        members : p.members,
+      }} />,      
+    }),
+  );
+};
+
+const handleCreateProject = () => {
+  dispatch(
+    setProjectModal({
+      title: "Create Project",
+      setOpen: true,
+      infor: <ProjectForm mode="create" initialData={{
+        projectName: "",
+        description: "",
+        categoryId: "",        
+      }} />,      
+    }),
+  );
+};
+  
+  const creatorName = (creatorId) => {    
     const u = userPool.find((x) => String(x.id) === String(creatorId));
     return u?.name || `#${creatorId}`;
   };
-  const categoryName = (categoryId) => {
-    console.log("userPool:", userPool, "categories:", categories);
+  const categoryName = (categoryId) => {    
     const c = categories.find((x) => String(x.id) === String(categoryId));
     return c?.categoryName || c?.name || `#${categoryId}`;
   };
@@ -246,7 +259,7 @@ function ProjectTable() {
         <Search placeholder="Project's name search" onSearch={onSearch} />
       </Space>
       <div className="text-left mb-3">
-        <Button type="primary" onClick={() => navigate("/project-management/create-project")}>
+        <Button type="primary" onClick={() => handleCreateProject()}>
           CREATE
         </Button>
       </div>

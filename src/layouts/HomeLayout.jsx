@@ -25,11 +25,18 @@ import { GetAllStatusTypeApi } from "services/data/statusTypes";
 import { GetAllTaskTypeApi } from "services/data/taskTypes";
 import { GetAllProjectCategoryApi } from "services/data/projectCategory";
 import { getMemberListApi } from "services/user";
-import { setCategory, setTaskTypeList, setPriorityList, setStatusList, setuserSearch } from "store/actions/user.action";
+import {
+  setCategory,
+  setTaskTypeList,
+  setPriorityList,
+  setStatusList,
+  setuserSearch,
+} from "store/actions/user.action";
 import CreateTaskForm from "CreateTask/CreateTaskForm";
 import ProjectSider from "modules/Sider/ProjectSider";
 import logo from "../logo.svg";
 import "./index.scss";
+import { logoutApi } from "services/auth.service";
 
 const { Content, Footer, Sider } = Layout;
 
@@ -48,35 +55,45 @@ function HomeLayout() {
   const { pathname } = useLocation();
 
   const { state: members } = useAsync({
-  service: getMemberListApi,
-  queryKey: ["members-list"],
-});
+    service: getMemberListApi,
+    queryKey: ["members-list"],
+  });
 
-const { state: categories } = useAsync({
-  service: GetAllProjectCategoryApi,
-  queryKey: ["metadata", "categories"],
-});
+  const { state: categories } = useAsync({
+    service: GetAllProjectCategoryApi,
+    queryKey: ["metadata", "categories"],
+  });
 
-const { state: priorities } = useAsync({
-  service: GetAllPriorityTypeApi,
-  queryKey: ["metadata", "priorities"],
-});
+  const { state: priorities } = useAsync({
+    service: GetAllPriorityTypeApi,
+    queryKey: ["metadata", "priorities"],
+  });
 
-const { state: statuses } = useAsync({
-  service: GetAllStatusTypeApi,
-  queryKey: ["metadata", "statuses"],
-});
+  const { state: statuses } = useAsync({
+    service: GetAllStatusTypeApi,
+    queryKey: ["metadata", "statuses"],
+  });
 
-const { state: taskTypes } = useAsync({
-  service: GetAllTaskTypeApi,
-  queryKey: ["metadata", "task-types"],
-});
+  const { state: taskTypes } = useAsync({
+    service: GetAllTaskTypeApi,
+    queryKey: ["metadata", "task-types"],
+  });
 
-useEffect(() => { if (members) dispatch(setuserSearch(members)); }, [members, dispatch]);
-useEffect(() => { if (categories) dispatch(setCategory(categories)); }, [categories, dispatch]);
-useEffect(() => { if (priorities) dispatch(setPriorityList(priorities)); }, [priorities, dispatch]);
-useEffect(() => { if (statuses) dispatch(setStatusList(statuses)); }, [statuses, dispatch]);
-useEffect(() => { if (taskTypes) dispatch(setTaskTypeList(taskTypes)); }, [taskTypes, dispatch]);
+  useEffect(() => {
+    if (members) dispatch(setuserSearch(members));
+  }, [members, dispatch]);
+  useEffect(() => {
+    if (categories) dispatch(setCategory(categories));
+  }, [categories, dispatch]);
+  useEffect(() => {
+    if (priorities) dispatch(setPriorityList(priorities));
+  }, [priorities, dispatch]);
+  useEffect(() => {
+    if (statuses) dispatch(setStatusList(statuses));
+  }, [statuses, dispatch]);
+  useEffect(() => {
+    if (taskTypes) dispatch(setTaskTypeList(taskTypes));
+  }, [taskTypes, dispatch]);
 
   // null = cả 2 ở icon-mode | 'global' | 'project' = sider đó đang expand
   const [activeSidebar, setActiveSidebar] = useState(null);
@@ -112,12 +129,24 @@ useEffect(() => { if (taskTypes) dispatch(setTaskTypeList(taskTypes)); }, [taskT
     if (isAdmin) {
       baseItems.push(
         getItem("User Management", "/user-management", <TeamOutlined />),
-        getItem("Project Management", "/project-management", <ProjectOutlined />),
-        getItem("Task Management","/task-management",<UnorderedListOutlined />),
+        getItem(
+          "Project Management",
+          "/project-management",
+          <ProjectOutlined />,
+        ),
+        getItem(
+          "Task Management",
+          "/task-management",
+          <UnorderedListOutlined />,
+        ),
       );
     } else {
       baseItems.push(
-        getItem("Task Management","/task-management",<UnorderedListOutlined />),                      
+        getItem(
+          "Task Management",
+          "/task-management",
+          <UnorderedListOutlined />,
+        ),
       );
     }
     baseItems.push(
@@ -143,10 +172,15 @@ useEffect(() => { if (taskTypes) dispatch(setTaskTypeList(taskTypes)); }, [taskT
     }
   }, [data, currentUser?.id, userState.myProject]);
 
-  const handleLogout = () => {
-    localStorage.removeItem(USER_KEY);
-    dispatch(setUserInfoAction(null));
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+    } finally {
+      localStorage.removeItem(USER_KEY);
+      dispatch(setUserInfoAction(null));
+      navigate("/login");
+    }
   };
 
   const handleGlobalClick = ({ key, domEvent }) => {

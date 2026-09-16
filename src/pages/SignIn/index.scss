@@ -1,90 +1,235 @@
-.app-layout-root {
-  --global-width-icon: 80px;
-  --global-width-expand: 220px;
-  
-  --project-width-icon: 70px;
-  --project-width-expand: 240px;
+// Biến màu sắc Jira
+$jira-blue: #0052cc;
+$jira-blue-hover: #0747a6;
+$jira-dark: #172b4d;
+$jira-text: #42526e;
+$jira-bg: #f4f5f7;
+$jira-border: #dfe1e6;
 
-  --current-global-width: var(--global-width-icon);
-  --current-project-width: var(--project-width-icon);
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: $jira-dark;
+  background-color: #fff;
+}
 
-  &.global-expanded {
-    --current-global-width: var(--global-width-expand);
-    --current-project-width: var(--project-width-icon);
-  }
+header {
+  border-bottom: 1px solid $jira-border;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 
-  &.project-expanded {
-    --current-global-width: var(--global-width-icon);
-    --current-project-width: var(--project-width-expand);
-  }
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    max-width: 100%;
+    margin: 0 auto;
 
-  // 1. Sider 1 (Global Sider)
-  .custom-global-sider {
-    position: fixed !important;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 100;
-    width: var(--current-global-width) !important;
-    min-width: var(--current-global-width) !important;
-    max-width: var(--current-global-width) !important;
-    // Hiệu ứng transition mượt mà khi width thay đổi (khi click)
-    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-
-    // Hiệu ứng nhẹ khi hover vào Sider ở trạng thái thu gọn
-    &:hover {
-      filter: brightness(1.05);
+    .navbar-brand img {
+      height: 28px;
     }
-  }
 
-  // 2. Sider 2 (Project Sider)
-  .custom-project-sider {
-    position: fixed !important;
-    left: var(--current-global-width) !important;
-    top: 0;
-    bottom: 0;
-    z-index: 90;
-    width: var(--current-project-width) !important;
-    min-width: var(--current-project-width) !important;
-    max-width: var(--current-project-width) !important;
-    border-right: 1px solid #e8e8e8;
-    // Hiệu ứng mượt mà cho cả width lẫn vị trí left khi Sider 1 thay đổi kích thước
-    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), left 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+    .btn-signup {
+      background-color: $jira-bg;
+      color: $jira-dark;
+      border: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 3px;
+      transition: background 0.2s ease;
 
-    // Xử lý logo thu nhỏ/phóng to khi Sider 2 đóng/mở
-    .app-layout-root:not(.project-expanded) & {
-      .ant-image {
-        transform: scale(0.6);
-        opacity: 0.7;
-        transition: all 0.3s ease;
-      }
-    }
-    
-    .app-layout-root.project-expanded & {
-      .ant-image {
-        transform: scale(1);
-        opacity: 1;
-        transition: all 0.3s ease;
+      &:hover {
+        background-color: darken($jira-bg, 5%);
       }
     }
   }
+}
 
-  // 3. Main Content Wrapper
-  .main-content-wrapper {
-    margin-left: calc(var(--current-global-width) + var(--current-project-width));
-    transition: margin-left 0.35s cubic-bezier(0.2, 0, 0, 1);
-    min-height: 100vh;
-    background: transparent;
+.loginPage {
+  min-height: calc(100vh - 57px);
+  display: flex;
+  width: 100%;
 
-    .main-content-body {
-      padding: 0 16px;
-      overflow-y: auto;
+  // Ghi đè container-fluid để chạy thuần Flexbox căn đều 2 cột
+  .container-fluid {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Cột trái: Giới thiệu
+  .login-component-1 {
+    flex: 1;
+    background: linear-gradient(135deg, #deebff 0%, #f4f5f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+
+    .p-content {
+      max-width: 480px;
+
+      h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $jira-dark;
+        margin-bottom: 24px;
+        line-height: 1.3;
+      }
+
+      p {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: $jira-text;
+        margin-bottom: 12px;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          position: relative;
+          padding-left: 20px;
+          margin-bottom: 10px;
+          color: $jira-text;
+          font-size: 0.95rem;
+
+          &::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: $jira-blue;
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Cột phải: Form chứa nội dung đăng nhập (Được canh giữa tuyệt đối)
+  .login-component-2 {
+    flex: 1;
+    display: flex;
+    align-items: center;      // Canh giữa theo chiều dọc
+    justify-content: center;  // Canh giữa theo chiều ngang
+    background-color: #fff;
+    padding: 40px 20px;
+
+    .form-content {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+
+      .auth-switch {
+        display: flex;
+        background-color: $jira-bg;
+        padding: 4px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+
+        button {
+          flex: 1;
+          background: transparent;
+          border: none;
+          padding: 8px;
+          font-weight: 600;
+          color: $jira-text;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &.active {
+            background-color: #fff;
+            color: $jira-blue;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+
+      form, div[style*="text-center"] {
+        width: 100% !important; // Ghi đè w-75 cũ để form căn đẹp trong khung 400px
+
+        h2 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $jira-dark;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+
+        label {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: $jira-text;
+          margin-bottom: 6px;
+          display: block;
+        }
+
+        .form-control {
+          background-color: $jira-bg;
+          border: 2px solid $jira-border;
+          border-radius: 3px;
+          padding: 10px 12px;
+          font-size: 0.95rem;
+          color: $jira-dark;
+          transition: all 0.2s ease;
+          box-shadow: none;
+          margin-bottom: 16px;
+
+          &:focus {
+            background-color: #fff;
+            border-color: $jira-blue;
+            box-shadow: none;
+          }
+        }
+
+        .btn-primary {
+          background-color: $jira-blue;
+          border: none;
+          font-weight: 600;
+          padding: 10px;
+          border-radius: 3px;
+          width: 100%;
+          transition: background-color 0.2s;
+
+          &:hover {
+            background-color: $jira-blue-hover;
+          }
+        }
+
+        .btn-link {
+          color: $jira-blue;
+          font-size: 0.9rem;
+          text-decoration: none;
+          display: block;
+          margin: 10px auto 0;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive cho Mobile
+@media (max-width: 768px) {
+  .loginPage {
+    .login-component-1 {
+      display: none; // Ẩn cột giới thiệu trên mobile
+    }
+    .login-component-2 {
+      min-height: calc(100vh - 57px);
+      padding: 20px;
     }
   }
 }

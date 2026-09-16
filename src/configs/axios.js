@@ -1,64 +1,68 @@
 import axios from "axios";
 import { BASE_URL, USER_KEY } from "../constants/common";
-import { getAuth } from "firebase/auth";
 
 export const request = axios.create({
-  // proxy: false,    
   baseURL: BASE_URL,
-  // withCredentials: false,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
 
-request.interceptors.request.use(async (config) => {  
-  const savedData = localStorage.getItem(USER_KEY);
-  if (savedData) {
-    try {
-      const parsedData = JSON.parse(savedData);            
-      const token = parsedData?.loginToken || parsedData?.accessToken;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }    
-    //   const auth = getAuth();      
-    //  const currentUser = await new Promise((resolve) => {        
-    //     if (auth.currentUser) return resolve(auth.currentUser);        
-    //     const unsubscribe = auth.onAuthStateChanged((user) => {
-    //       unsubscribe();
-    //       resolve(user);
-    //     });
-    //   });
-      
-    //   if (currentUser) {        
-    //     const firebaseRealtimeToken = await currentUser.getIdToken();
-    //     if (firebaseRealtimeToken) {
-    //       config.headers["firebase-token"] = firebaseRealtimeToken;
-    //     }
-    //   }
-    } catch (error) {
-      console.error("Lỗi xử lý gửi token bảo mật:", error);
-    }
-  }
+// Request Interceptor
+request.interceptors.request.use((config) => {
+  // Sửa lại cho đúng chuẩn chuỗi key 'accessToken'
+  const token = localStorage.getItem("accessToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+}, (error) => Promise.reject(error));
 
+let refreshing = false;   // chặn nhiều request cùng trigger refresh
+
+// Response Interceptor
 request.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.log("Lỗi hệ thống trả về:", error);    
-    if (error.response?.status === 403) {
-      alert("Phiên làm việc không hợp lệ hoặc đã thay đổi thiết bị. Vui lòng đăng nhập lại!");            
-      localStorage.removeItem(USER_KEY);            
-      const auth = getAuth();
-      auth.signOut();            
-      window.location.href = "/login";
+  (response) => response,
+  async (error) => {
+    const original = error.config;
+    if (error.response?.status !== 401 || original._retry) return Promise.reject(error);
+
+    original._retry = true;
+
+    if (refreshing) {
+      // Đang refresh rồi: chờ 1 nhịp rồi thử lại request cũ
+      return new Promise((resolve, reject) => {
+        const wait = setInterval(() => {
+          if (!refreshing) {
+            clearInterval(wait);
+            const token = localStorage.getItem('accessToken');
+            if (token) original.headers.Authorization = `Bearer ${token}`;
+            request(original).then(resolve).catch(reject);
+          }
+        }, 100);
+      });
     }
 
-    return Promise.reject(error);
+    refreshing = true;
+    try {      
+      const res = await axios.post(`${BASE_URL}/api/Auth/refresh`, {}, { withCredentials: true });
+      const newToken = res.data?.content?.accessToken;
+      if (!newToken) throw new Error('no token');
+
+      localStorage.setItem('accessToken', newToken);
+      original.headers.Authorization = `Bearer ${newToken}`;
+      return request(original);
+    } catch (refreshError) {
+      // Xóa sạch thông tin đăng nhập khi refresh token thất bại/hết hạn
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem(USER_KEY); 
+      
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(refreshError);
+    } finally {
+      refreshing = false;
+    }
   }
 );

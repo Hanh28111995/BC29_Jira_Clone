@@ -34,7 +34,7 @@ function removeVietnameseTones(str) {
     return str;
   }
 
-  const isEqual = (obj1, obj2) => {
+const isEqual = (obj1, obj2) => {
     const objKey1 = Object.keys(obj1);
     const objKey2 = Object.keys(obj2);
     if (objKey1.length !== objKey2.length) { return false }
@@ -42,6 +42,13 @@ function removeVietnameseTones(str) {
       if (obj1[ojbKey] !== obj2[ojbKey]) { return false }
     }
     return true
-  }
+}
 
-  export { removeVietnameseTones, isEqual }; 
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch { return true; }
+};
+
+export { removeVietnameseTones, isEqual, isTokenExpired }; 

@@ -1,7 +1,10 @@
+import TaskTable from 'modules/Tables/TaskTable'
 import React from 'react'
 
 export default function TaskManagement() {
   return (
-    <div>TaskManagement</div>
+    <div>
+      <TaskTable />
+    </div>
   )
 }

@@ -1,8 +1,8 @@
 import { USER_KEY } from "../../constants/common";
-import { 
-  AuthActionTypes, 
-  ProjectTaskActionTypes, 
-  DefaultDataActionTypes 
+import {
+  AuthActionTypes,
+  ProjectTaskActionTypes,
+  DefaultDataActionTypes,
 } from "../types/user.type";
 
 let userInfor = null;
@@ -29,22 +29,38 @@ const savedAccessToken = (() => {
   }
 })();
 
+// Khai báo chuẩn cấu trúc dữ liệu Task mặc định để tái sử dụng
+export const initialTaskDetailModal = {
+  priorityId: null,
+  taskTypeId: null,
+  assigneeId: [],    
+  taskId: null,
+  taskName: "",
+  description: "",
+  statusId: "",
+  originalEstimate: 0,
+  timeTrackingSpent: 0,
+  timeTrackingRemaining: 0,    
+  projectId: null,
+  estimateHours: 0,
+};
+
 const DEFAULT_STATE = {
   // ==========================================
   // 1. AUTHENTICATION & GLOBAL UI STATES
   // ==========================================
   userInfor,
   accessToken: savedAccessToken,
-  date: '',
+  date: "",
   callBackSubmit: null,
-  reRenderDetail: false, 
+  reRenderDetail: false,
   setTaskModal: false,
 
   // ==========================================
   // 2. LISTS & GENERAL DATA
   // ==========================================
-  list: [],       // Danh sách search user
-  myProject: [],  // Danh sách project của tôi
+  list: [], // Danh sách search user
+  myProject: [], // Danh sách project của tôi
   projectMemList: [], // Danh sách thành viên trong project
 
   // ==========================================
@@ -61,58 +77,24 @@ const DEFAULT_STATE = {
   // 4. MODAL PROJECT STATE
   // ==========================================
   projectModal: {
-    title: '',
+    title: "",
     setOpen: false,
-    infor: null, // Component chứa form project
-    data: {
-      id: 0,
-      projectName: "",
-      creator: 0,
-      description: "",
-      categoryId: ""
-    }
+    infor: null, // Component chứa form project    
   },
 
   // ==========================================
   // 5. MODAL TASK STATE
   // ==========================================
   taskModal: {
-    title: '',
+    title: "",
     setOpen: false,
-    infor: null, // Component chứa form task
-    data: {
-      taskId: 0,
-      taskName: "",
-      description: "",
-      estimateHours: 0,
-      projectId: 0,
-      statusId: 0,
-      priorityId: 0,
-      taskTypeId: 0,
-      assigneeId: 0,
-    }
+    infor: null, // Component chứa form task    
   },
 
   // ==========================================
   // 6. TASK DETAIL MODAL (Jira Board style)
   // ==========================================
-  taskDetailModal: {
-    priorityTask: null,
-    taskTypeDetail: null,
-    assigness: [],
-    lstComment: [],
-    taskId: null,
-    taskName: '',
-    alias: '',
-    description: '',
-    statusId: '',
-    originalEstimate: 0,
-    timeTrackingSpent: 0,
-    timeTrackingRemaining: 0,
-    typeId: null,
-    priorityId: null,
-    projectId: null
-  },
+  taskDetailModal: initialTaskDetailModal,
 };
 
 export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
@@ -127,12 +109,22 @@ export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
           const current = localStorage.getItem(USER_KEY);
           let merged = { accessToken: state.accessToken };
           if (current) {
-            try { merged = { ...JSON.parse(current), ...merged, userInfo: nextUserInfo }; } catch { /* noop */ }
+            try {
+              merged = {
+                ...JSON.parse(current),
+                ...merged,
+                userInfo: nextUserInfo,
+              };
+            } catch {
+              /* noop */
+            }
           } else {
             merged.userInfo = nextUserInfo;
           }
           localStorage.setItem(USER_KEY, JSON.stringify(merged));
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
       return { ...state, userInfor: nextUserInfo };
     }
@@ -146,7 +138,9 @@ export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
           parsed.accessToken = token;
           delete parsed.loginToken;
           localStorage.setItem(USER_KEY, JSON.stringify(parsed));
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
       return { ...state, accessToken: token };
     }
@@ -159,14 +153,20 @@ export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
         try {
           const toSave = { accessToken: nextToken, userInfo: nextUser };
           localStorage.setItem(USER_KEY, JSON.stringify(toSave));
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
       return { ...state, accessToken: nextToken, userInfor: nextUser };
     }
 
     case AuthActionTypes.CLEAR_AUTH: {
       if (typeof window !== "undefined") {
-        try { localStorage.removeItem(USER_KEY); } catch { /* noop */ }
+        try {
+          localStorage.removeItem(USER_KEY);
+        } catch {
+          /* noop */
+        }
       }
       return { ...state, accessToken: null, userInfor: null };
     }
@@ -174,46 +174,52 @@ export const userReducer = (state = DEFAULT_STATE, { type, payload }) => {
     // ==========================================
     // PROJECT & TASK UI GROUP
     // ==========================================
-    case ProjectTaskActionTypes.SET_DATE: 
+    case ProjectTaskActionTypes.SET_DATE:
       return { ...state, date: payload };
 
-    case ProjectTaskActionTypes.SEARCH_USER: 
+    case ProjectTaskActionTypes.SEARCH_USER:
       return { ...state, list: payload };
 
-    case ProjectTaskActionTypes.SET_SUBMIT: 
+    case ProjectTaskActionTypes.SET_SUBMIT:
       return { ...state, callBackSubmit: payload };
 
-    case ProjectTaskActionTypes.SET_MY_PROJECT: 
+    case ProjectTaskActionTypes.SET_MY_PROJECT:
       return { ...state, myProject: payload };
 
-    case ProjectTaskActionTypes.SET_TASK_DETAIL: 
+    case ProjectTaskActionTypes.SET_TASK_DETAIL:
       return { ...state, taskDetailModal: payload };
 
-    case ProjectTaskActionTypes.SET_RENDER_DETAIL: 
+    case ProjectTaskActionTypes.SET_RENDER_DETAIL:
       return { ...state, reRenderDetail: payload };
 
-    case ProjectTaskActionTypes.SET_PROJECT_MEMLIST: 
+    case ProjectTaskActionTypes.SET_PROJECT_MEMLIST:
       return { ...state, projectMemList: payload };
 
-    case ProjectTaskActionTypes.SET_TASK_MODAL: 
-      return { ...state, setTaskModal: payload };
-
-    // Tách riêng các action thiết lập Modal Project & Task
-    case 'SET_PROJECT_MODAL': 
-      return { ...state, projectModal: payload };
-
-    case 'SET_TASK_MODAL_EDIT': 
+    case ProjectTaskActionTypes.SET_TASK_MODAL:
       return { ...state, taskModal: payload };
 
-    // Action thiết lập MetaData dùng chung
-    case 'SET_META_DATA': 
+    // Action thiết lập Modal Project & Task
+    case ProjectTaskActionTypes.SET_PROJECT_MODAL:
+      return { ...state, projectModal: payload };    
+
+    // Action thiết lập MetaData dùng chung (nếu có nơi dispatch trực tiếp)
+    case "SET_META_DATA":
       return { ...state, metaData: { ...state.metaData, ...payload } };
 
     // ==========================================
-    // DEFAULT DATA GROUP
+    // DEFAULT DATA GROUP — META DATA
     // ==========================================
-    case DefaultDataActionTypes.DEFAULT_CATEGORY: 
-      return { ...state, category: payload };
+    case DefaultDataActionTypes.SET_TASKTYPE_LIST:
+      return { ...state, metaData: { ...state.metaData, taskType: payload } };
+
+    case DefaultDataActionTypes.SET_PRIORITY_LIST:
+      return { ...state, metaData: { ...state.metaData, priority: payload } };
+
+    case DefaultDataActionTypes.SET_STATUS_LIST:
+      return { ...state, metaData: { ...state.metaData, status: payload } };
+
+    case DefaultDataActionTypes.SET_CATEGORY_LIST:
+      return { ...state, metaData: { ...state.metaData, category: payload } };
 
     default:
       return state;

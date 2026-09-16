@@ -4,35 +4,35 @@ import { request } from "../configs/axios";
  * NHÓM 1: CRUD TASK CƠ BẢN
  * ============================================================ */
 
-const GetAllTaskApi = (id) =>
+const GetAllTaskApi = () =>
   request({
-    url: `/api/Tasks/get-all-task/${id}`,
+    url: "/api/Tasks/get-all-task",
     method: "GET",
   });
 
-const GetDetailTaskApi = (id) =>
+const GetDetailTaskApi = (projectId, taskId) =>
   request({
-    url: `/api/Tasks/get-task-detail/${id}`,
+    url: `/api/Tasks/${projectId}/get-task-detail/${taskId}`,
     method: "GET",
   });
 
-const AddTaskApi = (data) =>
+const AddTaskApi = (projectId ,data) =>
   request({
-    url: `/api/Tasks/create-task`,
+    url: `/api/Tasks/${projectId}/create-task`,
     method: "POST",
     data,
   });
 
-const UpdateTaskApi = (id, data) =>
+const UpdateTaskApi = (projectId, taskId, data) =>
   request({
-    url: `/api/Tasks/update-task/${id}`,
+    url: `/api/Tasks/${projectId}/update-task/${taskId}`,
     method: "PUT",
     data,
   });
 
-const DeleteTaskApi = (id) =>
+const DeleteTaskApi = (projectId, taskId) =>
   request({
-    url: `/api/Tasks/delete-task/${id}`,
+    url: `/api/Tasks/${projectId}/delete-task/${taskId}`,
     method: "DELETE",
   });
 

@@ -1,18 +1,22 @@
-import React, { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { isTokenExpired, USER_KEY } from "constants/common";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export default function NoAuthGuards() {
   const navigate = useNavigate();
   const userState = useSelector((state) => state.userReducer);
-  // const [pathname] = useLocation();
 
   useEffect(() => {
-    if (userState.userInfor) {
-      navigate("/dashboard")
+    if (!userState.userInfor) return;               
+    const token = localStorage.getItem('accessToken');
+    if (!token || isTokenExpired(token)) {      
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem(USER_KEY);
+      return;
     }
-  }, []);
-  return (
-    <Outlet />
-  )
+    navigate('/dashboard');
+  }, [userState.userInfor]);
+
+  return <Outlet />;
 }

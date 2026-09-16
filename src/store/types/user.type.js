@@ -6,12 +6,11 @@ export const ProjectTaskActionTypes = {
     SET_MY_PROJECT: "SET_MY_PROJECT",
     SET_TASK_DETAIL: "SET_TASK_DETAIL",
     SET_RENDER_DETAIL: "SET_RENDER_DETAIL",
-    SET_PROJECT_MEMLIST: "SET_PROJECT_MEMLIST",
-    SET_TASK_MODAL: "SET_TASK_MODAL",
+    SET_PROJECT_MEMLIST: "SET_PROJECT_MEMLIST",  
     
     // Thêm 2 types mới để phân tách rõ modal Project và Task Edit
     SET_PROJECT_MODAL: "SET_PROJECT_MODAL",
-    SET_TASK_MODAL_EDIT: "SET_TASK_MODAL_EDIT",
+    SET_TASK_MODAL: "SET_TASK_MODAL",
 };
 
 // //// 2. Auth Group

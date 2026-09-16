@@ -51,7 +51,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container" style={{ padding: '24px', background: '#f5f7fa', minHeight: '100vh' }}>
+    <div className="dashboard-container" >
       {/* Phần chào mừng & Tác vụ nhanh */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
