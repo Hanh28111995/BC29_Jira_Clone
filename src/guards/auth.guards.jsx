@@ -1,24 +1,23 @@
-import React, { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { isTokenExpired, USER_KEY } from '../constants/common';
+import { Navigate, Outlet } from "react-router-dom";
+import { USER_KEY } from "constants/common";
+import { isTokenExpired } from "constants/common";
 
+const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userInfo ?? parsed;
+  } catch {
+    return null;
+  }
+};
 
 export default function AuthGuards() {
-  const userState = useSelector((state) => state.userReducer);
-  const navigate = useNavigate();
+  const user = getStoredUser();
+  const token = localStorage.getItem("accessToken");
+  const authed = !!user && !!token ;
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-
-    if (!userState.userInfor || !token || isTokenExpired(token)) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem(USER_KEY);
-      navigate("/login");
-    }
-  }, [userState.userInfor, navigate]);
-
-  return (
-    <Outlet />
-  );
+  if (!authed) return <Navigate to="/login" replace />;
+  return <Outlet />;
 }

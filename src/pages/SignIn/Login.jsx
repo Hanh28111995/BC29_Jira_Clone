@@ -5,13 +5,13 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { getToken } from "firebase/app-check";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { auth, appCheck } from "../../configs/firebase";
-import {  
+import {
   loginPW,
-  loginPhoneApi,  
+  loginPhoneApi,
   verifyPhoneOtpApi,
 } from "../../services/auth.service";
 import OTPInputCustom from "../../components/OtpInput/OtpInput";
-import { setCredentialsAction } from "../../store/actions/user.action";
+import { setUserInfoAction, setTokenAction } from "../../store/actions/user.action";
 import "../../components/OtpInput/index.scss";
 import "./index.scss";
 import { USER_KEY } from "constants/common";
@@ -31,11 +31,14 @@ const normalizePhone = (value) => {
   return value.trim();
 };
 
-const extractCredential = (result) => {  
-  const userInfo = result?.content ;
-  if (!userInfo) return null;    
-  const accessToken = userInfo?.accessToken;
-  return { accessToken, userInfo };
+// Ghi ĐỦ 3 nơi — thống nhất với interceptor + guard
+const persistLogin = (dispatch, navigate, content) => {
+  localStorage.setItem("accessToken", content.accessToken);        // key riêng — interceptor/guard đọc
+  localStorage.setItem(USER_KEY, JSON.stringify(content));          // thông tin user
+  dispatch(setUserInfoAction(content));                             // Redux bản sao
+  dispatch(setTokenAction(content.accessToken));
+  notification.success({ description: "Đăng nhập thành công" });
+  navigate("/dashboard");
 };
 
 export default function Login() {
@@ -57,14 +60,6 @@ export default function Login() {
 
   useEffect(() => () => recaptchaVerifier.current?.clear(), []);
 
-  const persistLogin = (accessToken, userInfo) => {
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(userInfo));
-    dispatch(setCredentialsAction({ accessToken, userInfo }));
-    notification.success({ description: "Đăng nhập thành công" });
-    setTimeout(() => navigate("/dashboard"), 0);
-  };
-
   const changeMode = (nextMode) => {
     setMode(nextMode);
     setParams(nextMode === "otp" ? { mode: "otp" } : {});
@@ -84,14 +79,15 @@ export default function Login() {
         });
         return;
       }
-      const credential = extractCredential(result);
-      if (!credential?.accessToken) {
+
+      if (!result.content?.accessToken) {
         notification.warning({
           description: "Phản hồi server không hợp lệ (thiếu accessToken)",
         });
         return;
       }
-      persistLogin(credential.accessToken, credential.userInfo);
+
+      persistLogin(dispatch, navigate, result.content);
     } catch (error) {
       notification.warning({
         description: getErrorMessage(error, "Đăng nhập thất bại"),
@@ -101,11 +97,10 @@ export default function Login() {
     }
   };
 
-const handleCheckPhoneNumber = async (event) => {
+  const handleCheckPhoneNumber = async (event) => {
     event.preventDefault();
     const raw = identifier.trim();
 
-    // Kiểm tra định dạng số điện thoại cơ bản
     const isPhoneValid = /^(?:\+?\d{1,4})?[\d\s-]{9,15}$/.test(raw);
     if (!isPhoneValid) {
       notification.warning({ description: "Số điện thoại không hợp lệ" });
@@ -114,10 +109,7 @@ const handleCheckPhoneNumber = async (event) => {
 
     setLoading(true);
     try {
-      // 1. Giữ nguyên số thô để Backend xác minh trong DB nếu cần
       const rawPhone = raw;
-
-      // 2. Chuẩn hóa về định dạng quốc tế (+84...) để Firebase chịu gửi SMS
       const normalizedPhone = normalizePhone(raw);
       if (!normalizedPhone || !normalizedPhone.startsWith("+")) {
         notification.warning({
@@ -136,7 +128,6 @@ const handleCheckPhoneNumber = async (event) => {
         }
       }
 
-      // SỬA Ở ĐÂY: đổi từ phoneNumber sang phone cho khớp với Swagger/Backend
       const response = await loginPhoneApi(rawPhone);
       if (!response?.isSuccess) {
         notification.warning({
@@ -145,7 +136,6 @@ const handleCheckPhoneNumber = async (event) => {
         return;
       }
 
-      // Khởi tạo reCAPTCHA nếu chưa có
       if (!recaptchaVerifier.current && recaptchaContainerRef.current) {
         recaptchaVerifier.current = new RecaptchaVerifier(
           auth,
@@ -157,7 +147,6 @@ const handleCheckPhoneNumber = async (event) => {
         );
       }
 
-      // Yêu cầu Firebase gửi OTP dùng số đã chuẩn hóa (+84)
       confirmationResult.current = await signInWithPhoneNumber(
         auth,
         normalizedPhone,
@@ -165,7 +154,7 @@ const handleCheckPhoneNumber = async (event) => {
       );
 
       setAuthType("phone");
-      setIdentifier(normalizedPhone); // Cập nhật lại state hiển thị dạng +84
+      setIdentifier(normalizedPhone);
       setOtpStep("verify");
     } catch (error) {
       recaptchaVerifier.current?.clear();
@@ -182,12 +171,10 @@ const handleCheckPhoneNumber = async (event) => {
     if (otp.length !== 6) return;
     setLoading(true);
     try {
-      // Xác thực OTP trực tiếp qua Firebase cho SĐT
       const idToken = await confirmationResult.current
         .confirm(otp)
         .then((result) => result.user.getIdToken(true));
 
-      // Gọi API backend của bạn để xác thực token và hoàn tất đăng nhập
       const verifyResult = await verifyPhoneOtpApi({ idToken });
 
       if (!verifyResult?.isSuccess) {
@@ -198,16 +185,14 @@ const handleCheckPhoneNumber = async (event) => {
         return;
       }
 
-      const credential = extractCredential(verifyResult);
-      console.log(credential, "credential after verifyPhoneOtpApi");
-      if (!credential?.accessToken) {
+      if (!verifyResult.content?.accessToken) {
         notification.warning({
-          description: "Mã OTP chính xác nhưng server chưa cấp accessToken",
+          description: "Phản hồi server không hợp lệ (thiếu accessToken)",
         });
         return;
       }
 
-      persistLogin(credential.accessToken, credential.userInfo);
+      persistLogin(dispatch, navigate, verifyResult.content);
     } catch (error) {
       notification.warning({
         description: getErrorMessage(

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL, USER_KEY } from "../constants/common";
+import { BASE_URL } from "../constants/common";
 
 export const request = axios.create({
   baseURL: BASE_URL,
@@ -10,10 +10,9 @@ export const request = axios.create({
   },
 });
 
-// Request Interceptor
+// Request: gắn Bearer từ key riêng
 request.interceptors.request.use(
   (config) => {
-    // Sửa lại cho đúng chuẩn chuỗi key 'accessToken'
     const token = localStorage.getItem("accessToken");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -21,18 +20,16 @@ request.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-let refreshing = false; // chặn nhiều request cùng trigger refresh
+let refreshing = false;
 
-// Response Interceptor
 request.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (error.response?.status !== 401 || original._retry)
-      return Promise.reject(error);
+    if (error.response?.status !== 401 || original._retry) return Promise.reject(error);
     original._retry = true;
+
     if (refreshing) {
-      // Đang refresh rồi: chờ 1 nhịp rồi thử lại request cũ
       return new Promise((resolve, reject) => {
         const wait = setInterval(() => {
           if (!refreshing) {
@@ -55,16 +52,13 @@ request.interceptors.response.use(
       const newToken = res.data?.content?.refreshToken;
       if (!newToken) throw new Error("no token");
 
-      localStorage.setItem("accessToken", newToken);      
+      localStorage.setItem("accessToken", newToken);
+      window.dispatchEvent(new Event("auth-updated"));
+
       original.headers.Authorization = `Bearer ${newToken}`;
       return request(original);
-    } catch (refreshError) {      
+    } catch (refreshError) {
       localStorage.removeItem("accessToken");
-      localStorage.removeItem(USER_KEY);
-
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
-      }
       return Promise.reject(refreshError);
     } finally {
       refreshing = false;

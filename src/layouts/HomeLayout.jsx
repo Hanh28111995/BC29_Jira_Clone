@@ -16,6 +16,7 @@ import { USER_KEY } from "constants/common";
 import {
   setEditDataProject,
   setMyProject,
+  setTokenAction,
   setUserInfoAction,
 } from "store/actions/user.action";
 import { fetchProjectListAPI } from "services/project";
@@ -177,9 +178,11 @@ function HomeLayout() {
       await logoutApi();
     } catch (e) {
     } finally {
-      localStorage.removeItem(USER_KEY);
-      dispatch(setUserInfoAction(null));
-      navigate("/login");
+      localStorage.removeItem("accessToken"); // ← thêm: xóa token key riêng
+      localStorage.removeItem(USER_KEY); // xóa user
+      dispatch(setUserInfoAction(null)); // ← thêm: sạch Redux
+      dispatch(setTokenAction(null));
+      navigate("/login", { replace: true }); // ← thêm: điều hướng chủ động
     }
   };
 
