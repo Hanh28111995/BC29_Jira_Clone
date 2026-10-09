@@ -1,32 +1,42 @@
 
 import React from 'react'
+import { Avatar, Button, Input, Tooltip } from 'antd'
+import { SearchOutlined, UserOutlined } from '@ant-design/icons'
 
 function InfoMain(props) {
-    const renderAvatar = () => {
-        return props.members?.map((user, index) => {
-            return (
-                <div key={index} className="avatar">
-                    <img src={user?.avatar} alt={user?.avatar} />
-                </div>
-            )
-        })
-    }
-
     return (
-        <div className="info w-100 row" >
-            <div className="search-block" style={{ marginLeft: '15px',display: 'flex' }}>
-                <input className="search" />
-                <i className="fa fa-search" />
+        <div className="project-board-toolbar">
+            <Input
+                allowClear
+                className="project-board-search"
+                placeholder="Tìm công việc, loại hoặc người được giao"
+                prefix={<SearchOutlined />}
+                value={props.searchTerm}
+                onChange={(event) => props.onSearch(event.target.value)}
+            />
+            <Button
+                className={props.onlyMyIssues ? 'project-board-filter is-active' : 'project-board-filter'}
+                icon={<UserOutlined />}
+                aria-pressed={props.onlyMyIssues}
+                onClick={props.onToggleMyIssues}
+            >
+                Việc của tôi
+            </Button>
+            <div className="project-board-members" aria-label="Thành viên dự án">
+                {props.members?.map((user) => (
+                    <Tooltip key={user.id} title={user.name || user.userName || 'Thành viên'}>
+                        <Avatar
+                            src={user.avatar || undefined}
+                            alt={user.name || user.userName || 'Thành viên'}
+                        >
+                            {(user.name || user.userName || '?').charAt(0).toUpperCase()}
+                        </Avatar>
+                    </Tooltip>
+                ))}
             </div>
-            <div className="avatar-group" style={{ marginLeft: '15px',display: 'flex'  }}>
-                {renderAvatar()}
-            </div>
-            <div  style={{ marginLeft: '15px',display: 'flex' }} className="text notBuild">Only My Issues</div>
-            <div  style={{ marginLeft: '15px',display: 'flex' }} className="text notBuild">Recently Updated</div>
         </div>
     )
 }
 
 export default InfoMain
-
 

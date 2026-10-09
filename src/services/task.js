@@ -10,6 +10,12 @@ const GetAllTaskApi = () =>
     method: "GET",
   });
 
+  const GetDashboardSummaryApi = () =>
+  request({
+    url: `/api/Tasks/dashboard-summary`,
+    method: "GET",
+  });
+
 const GetDetailTaskApi = (projectId, taskId) =>
   request({
     url: `/api/Tasks/${projectId}/get-task-detail/${taskId}`,
@@ -41,5 +47,6 @@ export {
   GetDetailTaskApi,
   AddTaskApi,
   UpdateTaskApi,
-  DeleteTaskApi,  
+  DeleteTaskApi,
+  GetDashboardSummaryApi   
 };

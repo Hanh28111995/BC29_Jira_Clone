@@ -8,6 +8,7 @@ import ChatPage from "pages/Chat/ChatPage";
 import ProjectManagement from "pages/Management/ProjectManagement";
 import TaskManagement from "pages/Management/TaskManagement";
 import Dashboard from "pages/Dashboard/Dashboard";
+import ProjectSettings from "pages/ProjectSettings/ProjectSettings";
 
 
 const Login = lazy(() => import("pages/SignIn/Login"));
@@ -59,6 +60,10 @@ export default function Router() {
             {
               path: "/project-management/project-detail/:projectId",
               element: <DetailBoard />,
+            },
+            {
+              path: "/project-management/project-detail/:projectId/settings",
+              element: <ProjectSettings />,
             },
 
             // 2 //////////////////////////////////

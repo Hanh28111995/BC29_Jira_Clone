@@ -18,7 +18,7 @@ const PROJECT_GROUPS = [
   {
     title: "PLANNING",
     items: [
-      { key: "/board", label: "Board", icon: <AppstoreOutlined /> },
+      { key: "/dashboard", label: "Dashboard", icon: <AppstoreOutlined /> },
       { key: "/backlog", label: "Backlog", icon: <BarsOutlined /> },
       { key: "/reports", label: "Reports", icon: <SendOutlined /> },
     ],
@@ -53,6 +53,7 @@ export default function ProjectSider({ expanded = false, projects = [] }) {
   })();
 
   const go = (path) => navigate(path);
+  const projectId = activeProjectId || projects[0]?.id;
 
   // Render một item custom: expanded -> icon + label, collapsed -> icon + Tooltip
   const renderItem = (key, label, icon, active, onGo) => {
@@ -106,9 +107,24 @@ export default function ProjectSider({ expanded = false, projects = [] }) {
       {PROJECT_GROUPS.map((group) => (
         <div className="ps-section" key={group.title}>
           {expanded && <div className="ps-section-title">{group.title}</div>}
-          {group.items.map((item) =>
-            renderItem(item.key, item.label, item.icon, isItemActive(item.key, pathname), () => go(item.key)),
-          )}
+          {          group.items.map((item) => {
+            const itemPath =
+              item.key === "/project-settings" && projectId
+                ? `/project-management/project-detail/${projectId}/settings`
+                : item.key;
+            const active =
+              item.key === "/project-settings"
+                ? pathname === itemPath
+                : isItemActive(itemPath, pathname);
+
+            return renderItem(item.key, item.label, item.icon, active, () => {
+              if (item.key === "/project-settings" && !projectId) {
+                go("/project-management");
+                return;
+              }
+              go(itemPath);
+            });
+          })}
         </div>
       ))}
     </div>

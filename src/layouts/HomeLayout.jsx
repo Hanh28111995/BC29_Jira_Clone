@@ -124,9 +124,7 @@ function HomeLayout() {
   const isAdmin = userRole === "admin" || userRole === "owner";
 
   const getGlobalMenuItems = () => {
-    const baseItems = [
-      getItem("Dashboard", "/dashboard", <DashboardOutlined />),
-    ];
+    const baseItems = [];
     if (isAdmin) {
       baseItems.push(
         getItem("User Management", "/user-management", <TeamOutlined />),
@@ -161,17 +159,17 @@ function HomeLayout() {
   const { state } = useAsync({
     dependencies: [],
     service: () => fetchProjectListAPI(),
+    queryKey: ["project-list"],
   });
-  const data = Array.isArray(state) ? state : null;
+  const mProjects = Array.isArray(state) ? state : null;
 
   useEffect(() => {
-    if (!currentUser?.id || !data) return;
-    const owned = data.filter((ele) => ele.creator?.id === currentUser.id);
-    const next = JSON.stringify(owned);
+    if (!mProjects) return;    
+    const next = JSON.stringify(mProjects);
     if (JSON.stringify(userState.myProject || []) !== next) {
-      dispatch(setMyProject(owned));
+      dispatch(setMyProject(mProjects));
     }
-  }, [data, currentUser?.id, userState.myProject]);
+  }, [mProjects, currentUser?.id, userState.myProject]);
 
   const handleLogout = async () => {
     try {
